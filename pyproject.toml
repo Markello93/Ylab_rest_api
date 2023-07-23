@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "resto"
+version = "0.1.0"
+description = "restoraunt_api"
+authors = ["Mark Krylov"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100.0"
+uvicorn = "^0.23.1"
+alembic = "^1.11.1"
+sqlalchemy = "^2.0.19"
+fastapi-restful = "^0.4.5"
+asyncpg = "^0.28.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+black = "^23.7.0"
+
+[tool.black]
+line-length = 79
+target-version = ["py311"]
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

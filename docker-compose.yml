@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: postgres-rest
+    image: postgres:13.0-alpine
+    restart: on-failure
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+
+  resto_back:
+    container_name: resto_back
+    depends_on:
+      - postgres
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: always
+    tty: true
+    ports:
+      - "8080:8080"
+
+
+
+
+volumes:
+  postgres_data:
