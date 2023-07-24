@@ -61,6 +61,4 @@ docker-compose up -d
 * uvicorn  
 * python-dotenv  
 * poetry  
-* PostgreSQL 
-  
-  
+* PostgreSQL
