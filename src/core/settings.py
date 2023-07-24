@@ -1,10 +1,6 @@
-import os
 from functools import cache
 
 from pydantic import BaseSettings
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -12,11 +8,11 @@ class Settings(BaseSettings):
 
     DEBUG: bool = False
     RESTO_ROOT_PATH: str = ""
-    RESTO_APP_DB_NAME: str #= os.getenv('RESTO_APP_DB_NAME')
-    RESTO_APP_DB_USER: str #= os.getenv('RESTO_APP_DB_USER')
-    RESTO_APP_DB_PASSWORD: str #= os.getenv('RESTO_APP_DB_PASSWORD')
-    DB_HOST: str #= os.getenv('DB_HOST')
-    DB_PORT: int #= os.getenv('DB_PORT')
+    RESTO_APP_DB_NAME: str
+    RESTO_APP_DB_USER: str
+    RESTO_APP_DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
 
     @property
     def database_url(self) -> str:

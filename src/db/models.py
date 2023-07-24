@@ -2,10 +2,10 @@ import uuid
 from decimal import Decimal
 from typing import List, Optional
 
-from sqlalchemy import Column, Integer, Numeric, Text, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, TEXT
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import sqlalchemy as sa
 
@@ -27,7 +27,10 @@ class Menu(Base):
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(TEXT, nullable=False)
     submenus: Mapped[List["Submenu"]] = relationship(
-        "Submenu", back_populates="menu", cascade="all, delete-orphan", lazy="selectin"
+        "Submenu",
+        back_populates="menu",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     @property
@@ -52,10 +55,13 @@ class Submenu(Base):
     )
 
     dishes: Mapped[List["Dish"]] = relationship(
-        "Dish", back_populates="submenu", cascade="all, delete-orphan", lazy="selectin"
+        "Dish",
+        back_populates="submenu",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
-    __table_args__ = (UniqueConstraint('title', 'menu_id'),)
+    __table_args__ = (UniqueConstraint("title", "menu_id"),)
 
     @property
     def num_dishes(self):
@@ -74,4 +80,3 @@ class Dish(Base):
     submenu: Mapped["Submenu"] = relationship(
         "Submenu", back_populates="dishes", lazy="selectin"
     )
-
