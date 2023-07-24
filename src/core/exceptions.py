@@ -1,9 +1,6 @@
 from http import HTTPStatus
-from typing import TypeVar
 
 from fastapi.exceptions import HTTPException
-
-DatabaseModel = TypeVar("DatabaseModel")
 
 
 class ObjectAlreadyExistsError(HTTPException):
@@ -13,6 +10,6 @@ class ObjectAlreadyExistsError(HTTPException):
 
 
 class ObjectNotFoundError(HTTPException):
-    def __init__(self, model: DatabaseModel):
-        self.detail = f"Object '{model}' not found."
+    def __init__(self, message: str):
+        self.detail = message
         self.status_code = HTTPStatus.NOT_FOUND

@@ -11,6 +11,8 @@ services:
       - 5432:5432
     env_file:
       - .env
+    networks: # Добавьте определение сети для контейнера PostgreSQL
+      - my_network  # Имя сети, например, my_network
 
   resto_back:
     container_name: resto_back
@@ -26,10 +28,16 @@ services:
     restart: always
     tty: true
     ports:
-      - "8080:8080"
+      - "8000:8000"
+    networks:  # Добавьте определение сети для контейнера resto_back
+      - my_network  # Имя сети, например, my_network
 
+networks:  # Определение сети my_network
+  my_network:
+    driver: bridge
 
 
 
 volumes:
   postgres_data:
+

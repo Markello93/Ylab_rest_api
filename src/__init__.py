@@ -9,8 +9,8 @@ from src.core.settings import settings
 
 def create_app() -> FastAPI:
     app = FastAPI(debug=settings.DEBUG, root_path=settings.RESTO_ROOT_PATH)
-    app.include_router(menu_router, prefix="/api/v1", tags=["menus"])
-    app.include_router(submenus_router, prefix="/api/v1", tags=["submenus"])
-    app.include_router(dishes_router, prefix="/api/v1", tags=["dishes"])
+    app.include_router(menu_router, prefix="/api/v1")
+    app.include_router(submenus_router, prefix="/api/v1")
+    app.include_router(dishes_router, prefix="/api/v1")
 
     return app
