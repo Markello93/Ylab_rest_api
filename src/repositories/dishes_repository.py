@@ -1,5 +1,4 @@
-from sqlalchemy import exists, select
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy import select
 
 from src.api.request_models.request_base import DishRequest
 
