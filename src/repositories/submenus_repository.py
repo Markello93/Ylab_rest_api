@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.submenu_response import AllSubmenuResponse
+from src.core import exceptions
 from src.db.db import get_session
-from src.db.models import Submenu
+from src.db.models import Menu, Submenu
 from src.repositories.abstract_repository import AbstractRepository
 
 
@@ -45,6 +46,9 @@ class SubmenuRepository(AbstractRepository):
         self, menu_id: UUID, schema: MenuRequest
     ) -> Submenu:
         """Create submenu object in the database."""
+        menu = await self._session.get(Menu, menu_id)
+        if menu is None:
+            raise exceptions.ObjectNotFoundError("Menu not found")
         submenu = Submenu(
             title=schema.title, description=schema.description, menu_id=menu_id
         )
