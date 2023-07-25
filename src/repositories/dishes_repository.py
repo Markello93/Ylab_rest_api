@@ -1,4 +1,5 @@
-from sqlalchemy import select
+from sqlalchemy import exists, select
+from sqlalchemy.exc import NoResultFound
 
 from src.api.request_models.request_base import DishRequest
 
@@ -7,6 +8,7 @@ from fastapi import Depends
 from typing import List, Optional
 from uuid import UUID
 
+from src.core import exceptions
 from src.db.models import Dish, Menu, Submenu
 from src.db.db import get_session
 from src.repositories.abstract_repository import AbstractRepository
@@ -43,6 +45,9 @@ class DishRepository(AbstractRepository):
         self, submenu_id: UUID, schema: DishRequest
     ) -> Dish:
         """Create dish object in the database."""
+        submenu = await self._session.get(Submenu, submenu_id)
+        if submenu is None:
+            raise exceptions.ObjectNotFoundError("Submenu not found")
         dish = Dish(
             title=schema.title,
             description=schema.description,
