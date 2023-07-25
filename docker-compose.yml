@@ -11,16 +11,14 @@ services:
       - 5432:5432
     env_file:
       - .env
-    networks: # Добавьте определение сети для контейнера PostgreSQL
-      - my_network  # Имя сети, например, my_network
+    networks:
+      - my_network
 
   resto_back:
+    image: markkryl93/resto_back:latest
     container_name: resto_back
     depends_on:
       - postgres
-    build:
-      context: ./
-      dockerfile: Dockerfile
     env_file:
       - .env
     volumes:
@@ -29,15 +27,12 @@ services:
     tty: true
     ports:
       - "8000:8000"
-    networks:  # Добавьте определение сети для контейнера resto_back
-      - my_network  # Имя сети, например, my_network
+    networks:
+      - my_network
 
-networks:  # Определение сети my_network
+networks:
   my_network:
     driver: bridge
 
-
-
 volumes:
   postgres_data:
-
