@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 from typing import List, Optional
 
-from sqlalchemy import Column, Numeric, UniqueConstraint
+from sqlalchemy import Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, TEXT
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import relationship
@@ -12,6 +12,7 @@ import sqlalchemy as sa
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class for database models with UUID-based primary key."""
+
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
         default=uuid.uuid4,
@@ -24,6 +25,7 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 class Menu(Base):
     """Model for creating Menu object in the database."""
+
     __tablename__ = "menus"
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
@@ -46,6 +48,7 @@ class Menu(Base):
 
 class Submenu(Base):
     """Model for creating Submenu object in the database."""
+
     __tablename__ = "submenus"
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
@@ -73,11 +76,14 @@ class Submenu(Base):
 
 class Dish(Base):
     """Model for creating Dish object in the database."""
+
     __tablename__ = "dishes"
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(TEXT, nullable=False)
-    price: Mapped[Optional[Decimal]] = Column(Numeric(precision=5, scale=2))
+    price: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(precision=5, scale=2), nullable=False
+    )
     submenu_id: Mapped[Optional[UUID]] = mapped_column(
         sa.ForeignKey("submenus.id"), nullable=False
     )

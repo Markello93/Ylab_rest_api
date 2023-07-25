@@ -38,7 +38,7 @@ def upgrade() -> None:
     op.create_table('dishes',
     sa.Column('title', sa.TEXT(), nullable=False),
     sa.Column('description', sa.TEXT(), nullable=False),
-    sa.Column('price', sa.Numeric(precision=5, scale=2), nullable=True),
+    sa.Column('price', sa.Numeric(precision=5, scale=2), nullable=False),
     sa.Column('submenu_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['submenu_id'], ['submenus.id'], ),
