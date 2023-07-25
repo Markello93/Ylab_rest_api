@@ -1,18 +1,9 @@
 from pydantic import BaseModel, UUID4
 
 
-class AllMenuResponse(BaseModel):
-    id: UUID4
-    title: str
-    description: str
-    submenus_count: int
-    dishes_count: int
-
-    class Config:
-        orm_mode = True
-
-
 class MenuResponse(BaseModel):
+    """Response model for menu without count of submenus and dishes."""
+
     id: UUID4
     title: str
     description: str
@@ -21,7 +12,9 @@ class MenuResponse(BaseModel):
         orm_mode = True
 
 
-class Menu_with_infoResponse(BaseModel):
+class MenuInfResponse(BaseModel):
+    """Response model for menu with count of submenus and dishes."""
+
     id: UUID4
     title: str
     description: str

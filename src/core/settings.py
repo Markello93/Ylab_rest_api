@@ -4,7 +4,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Настройки проекта."""
+    """Project settings."""
 
     DEBUG: bool = False
     RESTO_ROOT_PATH: str = ""
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        """Получить ссылку для подключения к DB."""
+        """Get link for DB connection."""
         return (
             f"postgresql+asyncpg://"
             f"{self.RESTO_APP_DB_USER}:{self.RESTO_APP_DB_PASSWORD}"

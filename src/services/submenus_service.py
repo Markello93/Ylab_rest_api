@@ -9,29 +9,35 @@ from src.repositories.submenus_repository import SubmenuRepository
 
 
 class SubmenuService:
+    """Service for working with model Submenu."""
+
     def __init__(
         self,
         submenus_repository: SubmenuRepository = Depends(),
     ) -> None:
         self._submenus_repository = submenus_repository
 
-    async def list_all_submenus(self) -> list[AllSubmenuResponse]:
-        return await self._submenus_repository.get_all_submenus_with_counts()
-
     async def create_submenu(
         self, menu_id: UUID, schema: MenuRequest
     ) -> Submenu:
-        return await self._submenus_repository.create_submenu(menu_id, schema)
-
-    async def update_submenu(
-        self, menu_id: UUID, submenu_id: UUID, schema: MenuRequest
-    ) -> Submenu:
-        return await self._submenus_repository.update_submenu(
-            menu_id, submenu_id, schema
+        return await self._submenus_repository.create_submenu_db(
+            menu_id, schema
         )
 
-    async def get_submenu(self, menu_id: UUID, submenu_id: UUID) -> Submenu:
-        return await self._submenus_repository.get_submenu(menu_id, submenu_id)
+    async def update_submenu(
+        self, submenu_id: UUID, schema: MenuRequest
+    ) -> Submenu:
+        return await self._submenus_repository.update_submenu_db(
+            submenu_id, schema
+        )
 
-    async def delete_submenu(self, menu_id: UUID, submenu_id: UUID):
-        await self._submenus_repository.delete_submenu(menu_id, submenu_id)
+    async def get_submenu(self, submenu_id: UUID) -> Submenu:
+        return await self._submenus_repository.get_submenu_db(submenu_id)
+
+    async def delete_submenu(self, submenu_id: UUID):
+        await self._submenus_repository.delete_submenu_db(submenu_id)
+
+    async def list_all_submenus(
+        self, menu_id: UUID
+    ) -> list[AllSubmenuResponse]:
+        return await self._submenus_repository.get_list_of_submenus_db(menu_id)

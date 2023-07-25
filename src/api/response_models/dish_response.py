@@ -3,6 +3,8 @@ from pydantic import BaseModel, UUID4
 
 
 class DishResponse(BaseModel):
+    """Response model for Dish."""
+
     id: UUID4
     title: str
     description: str

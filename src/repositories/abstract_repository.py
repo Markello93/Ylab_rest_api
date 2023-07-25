@@ -13,7 +13,10 @@ DatabaseModel = TypeVar("DatabaseModel")
 
 
 class AbstractRepository(abc.ABC):
-    """Abstract class for Repository pattern implementation."""
+    """
+    Abstract class for Repository pattern implementation, include all
+    CRUD operations.
+    """
 
     ERROR_MESSAGES = {
         Menu: "menu not found",
@@ -26,6 +29,10 @@ class AbstractRepository(abc.ABC):
         self._model = model
 
     async def create(self, instance: DatabaseModel) -> DatabaseModel:
+        """
+        Create object in the database. Raise error if object already
+        exist.
+        """
         self._session.add(instance)
         try:
             await self._session.commit()
@@ -36,6 +43,7 @@ class AbstractRepository(abc.ABC):
         return instance
 
     async def get_or_none(self, instance_id: UUID) -> Optional[DatabaseModel]:
+        """Get object by ID. Return None if object not found."""
         db_obj = await self._session.execute(
             select(self._model).where(self._model.id == instance_id)
         )
@@ -58,6 +66,7 @@ class AbstractRepository(abc.ABC):
         return objects.scalars().all()
 
     async def update(self, instance: DatabaseModel) -> DatabaseModel:
+        """Update object by ID. Raise error if object not found."""
         existing_instance = await self._session.get(self._model, instance.id)
         if existing_instance is None:
             error_message = self.ERROR_MESSAGES.get(
@@ -69,6 +78,7 @@ class AbstractRepository(abc.ABC):
         return instance
 
     async def delete(self, instance_id: UUID) -> None:
+        """Delete object by ID. Raise error if object not found."""
         db_obj = await self.get(instance_id)
         if db_obj is None:
             error_message = self.ERROR_MESSAGES.get(

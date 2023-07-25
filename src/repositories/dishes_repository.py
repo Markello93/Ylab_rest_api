@@ -13,21 +13,19 @@ from src.repositories.abstract_repository import AbstractRepository
 
 
 class DishRepository(AbstractRepository):
-    """Репозиторий для работы с моделью Dish."""
+    """Repository associated with model Dish."""
 
     def __init__(self, session: AsyncSession = Depends(get_session)):
         super().__init__(session, Dish)
 
-    async def get_dish(
-        self, menu_id: UUID, submenu_id: UUID, dish_id: UUID
-    ) -> Dish:
-        """Get dish by id."""
-
+    async def get_dish_db(self, dish_id: UUID) -> Dish:
+        """Get dish by dish_id."""
         return await self.get(dish_id)
 
-    async def get_dishes(
+    async def get_list_of_dishes_db(
         self, menu_id: UUID, submenu_id: UUID
     ) -> List[Optional[Dish]]:
+        """Get all dishes for submenu."""
         stmt = (
             select(Dish)
             .join(Submenu)
@@ -41,28 +39,10 @@ class DishRepository(AbstractRepository):
         dishes = await self._session.execute(stmt)
         return dishes.scalars().all()
 
-    async def update_dish(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        dish_id: UUID,
-        schema: DishRequest,
+    async def create_dish_db(
+        self, submenu_id: UUID, schema: DishRequest
     ) -> Dish:
-        dish = await self.get_dish(menu_id, submenu_id, dish_id)
-        dish.title = schema.title
-        dish.description = schema.description
-        dish.price = schema.price
-        return await self.update(dish)
-
-    async def delete_dish(
-        self, menu_id: UUID, submenu_id: UUID, dish_id: UUID
-    ) -> None:
-        dish = await self.get_dish(menu_id, submenu_id, dish_id)
-        await self.delete(dish.id)
-
-    async def create_dish(
-        self, menu_id: UUID, submenu_id: UUID, schema: DishRequest
-    ) -> Dish:
+        """Create dish object in the database."""
         dish = Dish(
             title=schema.title,
             description=schema.description,
@@ -70,3 +50,20 @@ class DishRepository(AbstractRepository):
             submenu_id=submenu_id,
         )
         return await self.create(dish)
+
+    async def update_dish_db(
+        self,
+        dish_id: UUID,
+        schema: DishRequest,
+    ) -> Dish:
+        """Update dish object in the database with the provided data."""
+        dish = await self.get_dish_db(dish_id)
+        dish.title = schema.title
+        dish.description = schema.description
+        dish.price = schema.price
+        return await self.update(dish)
+
+    async def delete_dish_db(self, dish_id: UUID) -> None:
+        """Delete dish object from the database."""
+        dish = await self.get_dish_db(dish_id)
+        await self.delete(dish.id)

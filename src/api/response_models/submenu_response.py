@@ -2,6 +2,8 @@ from pydantic import BaseModel, UUID4
 
 
 class AllSubmenuResponse(BaseModel):
+    """Response model for submenu with count of dishes."""
+
     id: UUID4
     title: str
     description: str
@@ -13,6 +15,8 @@ class AllSubmenuResponse(BaseModel):
 
 
 class SubmenuResponse(BaseModel):
+    """Response model for submenu without count of dishes."""
+
     id: UUID4
     title: str
     description: str
