@@ -6,7 +6,6 @@ from src.api.routers.submenus_router import submenus_router
 from src.core.settings import settings
 
 
-
 def create_app() -> FastAPI:
     app = FastAPI(debug=settings.DEBUG, root_path=settings.RESTO_ROOT_PATH)
     app.include_router(menu_router, prefix="/api/v1")
