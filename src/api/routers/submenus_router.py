@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.submenu_response import (
-    AllSubmenuResponse,
+    SubmenuInfoResponse,
     SubmenuResponse,
 )
 from src.services.submenus_service import SubmenuService
@@ -32,19 +32,13 @@ class SubmenuCBV:
 
     @submenus_router.get(
         "/{submenu_id}",
-        response_model=AllSubmenuResponse,
+        response_model=SubmenuInfoResponse,
         status_code=HTTPStatus.OK,
     )
     async def get_submenu_router(self, submenu_id: UUID):
         submenu = await self.__submenu_service.get_submenu(submenu_id)
-        submenu_response = AllSubmenuResponse(
-            id=submenu.id,
-            title=submenu.title,
-            menu_id=submenu.menu_id,
-            description=submenu.description,
-            dishes_count=submenu.num_dishes,
-        )
-        return submenu_response
+
+        return submenu
 
     @submenus_router.patch(
         "/{submenu_id}",
@@ -61,6 +55,6 @@ class SubmenuCBV:
         await self.__submenu_service.delete_submenu(submenu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
-    @submenus_router.get("/", response_model=List[AllSubmenuResponse])
+    @submenus_router.get("/", response_model=List[SubmenuInfoResponse])
     async def get_submenus_router(self, menu_id: UUID):
         return await self.__submenu_service.list_all_submenus(menu_id)

@@ -1,91 +1,137 @@
 import pytest
 from httpx import AsyncClient
-from faker import Faker
-from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.models import Submenu
-
-fake = Faker()
 
 
 @pytest.mark.run(order=6)
 async def test_get_empty_submenu_list(ac: AsyncClient, test_ids):
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/")
-    assert response.status_code == 200
+    assert (
+        response.status_code == 200
+    ), f"Expected status code 200, got {response.status_code} instead"
     response_json = response.json()
-    assert response_json == []
+    assert response_json == [], f"Expected [] got {response_json} instead"
 
 
 @pytest.mark.run(order=7)
-async def test_create_submenu(ac: AsyncClient, db_session: AsyncSession, test_ids, last_menu_data):
-    data = {
-        "title": fake.sentence(),
-        "description": fake.sentence()
-    }
-    response = await ac.post(f"/api/v1/menus/{test_ids['menu_id']}/submenus/", json=data)
-    assert response.status_code == 201, f'Expected status code 201, but got "{response.status_code}"'
+@pytest.mark.parametrize(
+    "menu_data", [{}], indirect=True, ids=["create_submenu"]
+)
+async def test_create(
+    ac: AsyncClient, db_session: AsyncSession, menu_data, test_ids
+):
+    response = await ac.post(
+        f"/api/v1/menus/{test_ids['menu_id']}/submenus/", json=menu_data
+    )
+    assert (
+        response.status_code == 201
+    ), f'Expected status code 201, but got "{response.status_code}"'
 
     response_json = response.json()
     submenu_id = await db_session.execute(
-        select(Submenu.id)
-        .order_by(Submenu.id.desc())
-        .limit(1)
+        select(Submenu.id).order_by(Submenu.id.desc()).limit(1)
     )
     last_submenu_id = str(submenu_id.scalar())
 
-    assert response_json["id"] == last_submenu_id
-    assert response_json["title"] == data["title"]
-    assert response_json["description"] == data["description"]
-    assert response_json["menu_id"] == test_ids['menu_id']
-    test_ids['submenu_id'] = last_submenu_id
+    assert response_json["id"] == last_submenu_id, "Unexpected id"
+    assert response_json["title"] == menu_data["title"], "Unexpected title"
+    assert (
+        response_json["description"] == menu_data["description"]
+    ), "Unexpected description"
+    assert (
+        response_json["menu_id"] == test_ids["menu_id"]
+    ), "Unexpected menu_id"
+    test_ids["submenu_id"] = last_submenu_id
 
 
 @pytest.mark.run(order=8)
-async def test_patch_submenu(ac: AsyncClient, db_session: AsyncSession, test_ids,last_submenu_data):
-    data = {
-    "title": fake.sentence(),
-    "description": fake.sentence()
-    }
-    response = await ac.patch(f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}",json=data)
-    assert response.status_code == 200
+@pytest.mark.parametrize(
+    "menu_data", [{}], indirect=True, ids=["patch_submenu"]
+)
+async def test_patch(
+    ac: AsyncClient,
+    db_session: AsyncSession,
+    menu_data,
+    test_ids,
+    last_submenu_data,
+):
+    response = await ac.patch(
+        f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}",
+        json=menu_data,
+    )
+    assert (
+        response.status_code == 200
+    ), f'Expected status code 200, but got "{response.status_code}"'
     response_json = response.json()
-    assert response_json["title"] != last_submenu_data["title"]
-    assert response_json["description"] != last_submenu_data["description"]
-    assert response_json["id"] == last_submenu_data['id']
-    assert response_json["menu_id"] == test_ids['menu_id']
+    assert response_json["id"] == last_submenu_data["id"], "Unexpected id"
+    assert (
+        response_json["title"] != last_submenu_data["title"]
+    ), "Unexpected title"
+    assert (
+        response_json["description"] != last_submenu_data["description"]
+    ), "Unexpected description"
+    assert (
+        response_json["menu_id"] == test_ids["menu_id"]
+    ), "Unexpected menu_id"
 
 
 @pytest.mark.run(order=9)
-async def test_get_submenu(ac: AsyncClient, db_session: AsyncSession, test_ids, last_submenu_data):
-    response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}")
-    assert response.status_code == 200
+async def test_get_submenu(
+    ac: AsyncClient, db_session: AsyncSession, test_ids, last_submenu_data
+):
+    response = await ac.get(
+        f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
+    )
+    assert (
+        response.status_code == 200
+    ), f'Expected status code 200, but got "{response.status_code}"'
 
     response_json = response.json()
 
-    assert response_json["id"] == test_ids['submenu_id']
-    assert response_json["title"] == last_submenu_data["title"]
-    assert response_json["description"] == last_submenu_data["description"]
+    assert response_json["id"] == test_ids["submenu_id"], "Unexpected id"
+    assert (
+        response_json["title"] == last_submenu_data["title"]
+    ), "Unexpected title"
+    assert (
+        response_json["description"] == last_submenu_data["description"]
+    ), "Unexpected description"
 
 
 @pytest.mark.run(order=10)
 async def test_get_submenu_list(ac: AsyncClient, test_ids):
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/")
-    assert response.status_code == 200
+    assert (
+        response.status_code == 200
+    ), f'Expected status code 200, but got "{response.status_code}"'
     response_json = response.json()
-    assert response_json != []
+    assert response_json != [], f"Unexpected empty list []"
 
 
 @pytest.mark.run(order=18)
-async def test_del_submenu(ac: AsyncClient, db_session: AsyncSession, test_ids):
-
-    response = await ac.delete(f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}")
-    assert response.status_code == 200
+async def test_del_submenu(
+    ac: AsyncClient, db_session: AsyncSession, test_ids
+):
+    response = await ac.delete(
+        f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
+    )
+    assert (
+        response.status_code == 200
+    ), f'Expected status code 200, but got "{response.status_code}"'
 
 
 @pytest.mark.run(order=19)
-async def test_get_nonexistent_submenu(ac: AsyncClient, db_session: AsyncSession, test_ids):
-    response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}")
-    assert response.status_code == 404
+async def test_get_nonexistent_submenu(
+    ac: AsyncClient, db_session: AsyncSession, test_ids
+):
+    response = await ac.get(
+        f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
+    )
+    assert (
+        response.status_code == 404
+    ), f'Expected status code 404, but got "{response.status_code}"'
     response_json = response.json()
-    assert response_json["detail"] == "submenu not found"
+    assert (
+        response_json["detail"] == "submenu not found"
+    ), "Expected detail - submenu not found"

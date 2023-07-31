@@ -31,15 +31,7 @@ class MenuCBV:
         status_code=HTTPStatus.OK,
     )
     async def get_menu_router(self, menu_id: UUID):
-        menu = await self.__menu_service.get_menu(menu_id)
-        menu_response = MenuInfResponse(
-            id=menu.id,
-            title=menu.title,
-            description=menu.description,
-            submenus_count=menu.num_submenus,
-            dishes_count=menu.num_dishes,
-        )
-        return menu_response
+        return await self.__menu_service.get_menu(menu_id)
 
     @menu_router.patch(
         "/{menu_id}", response_model=MenuResponse, status_code=HTTPStatus.OK

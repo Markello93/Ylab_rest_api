@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import Depends
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.submenu_response import AllSubmenuResponse
+from src.api.response_models.submenu_response import SubmenuInfoResponse
 from src.db.models import Submenu
 from src.repositories.submenus_repository import SubmenuRepository
 
@@ -31,13 +31,15 @@ class SubmenuService:
             submenu_id, schema
         )
 
-    async def get_submenu(self, submenu_id: UUID) -> Submenu:
-        return await self._submenus_repository.get_submenu_db(submenu_id)
+    async def get_submenu(self, submenu_id: UUID) -> SubmenuInfoResponse:
+        return await self._submenus_repository.get_submenu_with_count_db(
+            submenu_id
+        )
 
     async def delete_submenu(self, submenu_id: UUID):
         await self._submenus_repository.delete_submenu_db(submenu_id)
 
     async def list_all_submenus(
         self, menu_id: UUID
-    ) -> list[AllSubmenuResponse]:
+    ) -> list[SubmenuInfoResponse]:
         return await self._submenus_repository.get_list_of_submenus_db(menu_id)

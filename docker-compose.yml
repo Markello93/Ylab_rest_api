@@ -13,6 +13,12 @@ services:
       - .env
     networks:
       - my_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d","postgres-rest" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 80s
 
   resto_back:
     build:
@@ -20,7 +26,8 @@ services:
       dockerfile: Dockerfile
     container_name: resto_back
     depends_on:
-      - postgres
+       postgres:
+         condition: service_healthy
     env_file:
       - .env
     volumes:
