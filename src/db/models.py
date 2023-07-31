@@ -37,14 +37,6 @@ class Menu(Base):
         lazy="selectin",
     )
 
-    @property
-    def num_submenus(self):
-        return len(self.submenus)
-
-    @property
-    def num_dishes(self):
-        return sum(submenu.num_dishes for submenu in self.submenus)
-
 
 class Submenu(Base):
     """Model for creating Submenu object in the database."""
@@ -68,10 +60,6 @@ class Submenu(Base):
     )
 
     __table_args__ = (UniqueConstraint("title", "menu_id"),)
-
-    @property
-    def num_dishes(self):
-        return len(self.dishes)
 
 
 class Dish(Base):

@@ -40,4 +40,4 @@ ADD . /app
 
 EXPOSE 8000/tcp
 
-ENTRYPOINT /app/entrypoint.sh
+ENTRYPOINT /app/test_entrypoint.sh

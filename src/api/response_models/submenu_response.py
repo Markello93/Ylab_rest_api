@@ -1,7 +1,7 @@
 from pydantic import BaseModel, UUID4
 
 
-class AllSubmenuResponse(BaseModel):
+class SubmenuInfoResponse(BaseModel):
     """Response model for submenu with count of dishes."""
 
     id: UUID4

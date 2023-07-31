@@ -1,11 +1,13 @@
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.menu_response import MenuInfResponse
-from src.db.models import Menu
+from src.core import exceptions
+from src.db.models import Dish, Menu, Submenu
 from src.db.db import get_session
 from src.repositories.abstract_repository import AbstractRepository
 
@@ -16,23 +18,65 @@ class MenuRepository(AbstractRepository):
     def __init__(self, session: AsyncSession = Depends(get_session)):
         super().__init__(session, Menu)
 
-    async def get_menu_db(self, menu_id: UUID) -> Menu:
+    async def get_menu_db(self, menu_id: UUID):
         """Get menu by menu_id."""
         return await self.get(menu_id)
 
-    async def get_list_of_menus_db(self) -> List[MenuInfResponse]:
-        """Get list of menus with quantity of submenus and dishes."""
-        menus = await self.get_all()
-        menu_responses = []
-        for menu in menus:
+    async def get_menu_db_with_counts(
+        self, menu_id: UUID
+    ) -> Optional[MenuInfResponse]:
+        """Get menu by menu_id with submenu and dish counts."""
+        stmt = (
+            select(
+                Menu,
+                func.count(Submenu.id.distinct()).label("submenus_count"),
+                func.count(Dish.id.distinct()).label("dishes_count"),
+            )
+            .outerjoin(Submenu, Menu.submenus)
+            .outerjoin(Dish, Submenu.dishes)
+            .where(Menu.id == menu_id)
+            .group_by(Menu.id)
+        )
+        menu_with_counts = (await self._session.execute(stmt)).first()
+
+        if menu_with_counts:
+            menu, submenus_count, dishes_count = menu_with_counts
             menu_response = MenuInfResponse(
                 id=menu.id,
                 title=menu.title,
                 description=menu.description,
-                submenus_count=menu.num_submenus,
-                dishes_count=menu.num_dishes,
+                submenus_count=submenus_count,
+                dishes_count=dishes_count,
+            )
+            return menu_response
+
+        raise exceptions.ObjectNotFoundError("menu not found")
+
+    async def get_list_of_menus_db(self) -> List[MenuInfResponse]:
+        """Get list of menus with quantity of submenus and dishes."""
+        stmt = (
+            select(
+                Menu,
+                func.count(Submenu.id).label("submenus_count"),
+                func.count(Dish.id).label("dishes_count"),
+            )
+            .join(Menu.submenus, isouter=True)
+            .join(Submenu.dishes, isouter=True)
+            .group_by(Menu.id)
+        )
+        menus_with_counts = await self._session.execute(stmt)
+
+        menu_responses = []
+        for menu, submenus_count, dishes_count in menus_with_counts:
+            menu_response = MenuInfResponse(
+                id=menu.id,
+                title=menu.title,
+                description=menu.description,
+                submenus_count=submenus_count,
+                dishes_count=dishes_count,
             )
             menu_responses.append(menu_response)
+
         return menu_responses
 
     async def create_menu_db(self, schema: MenuRequest) -> Menu:

@@ -1,12 +1,12 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.submenu_response import AllSubmenuResponse
+from src.api.response_models.submenu_response import SubmenuInfoResponse
 from src.core import exceptions
 from src.db.db import get_session
 from src.db.models import Menu, Submenu
@@ -21,26 +21,57 @@ class SubmenuRepository(AbstractRepository):
 
     async def get_list_of_submenus_db(
         self, menu_id: UUID
-    ) -> List[AllSubmenuResponse]:
+    ) -> List[SubmenuInfoResponse]:
         """Get all submenus for menu with quantity of dishes from database."""
-        submenus = await self._session.execute(
-            select(Submenu).where(Submenu.menu_id == menu_id)
+        stmt = (
+            select(Submenu, func.count(Submenu.dishes).label("dishes_count"))
+            .join(Submenu.dishes, isouter=True)
+            .where(Submenu.menu_id == menu_id)
+            .group_by(Submenu)
         )
-        submenu_responses = []
-        for submenu in submenus.scalars().all():
-            submenu_response = AllSubmenuResponse(
+        submenus_with_counts = (await self._session.execute(stmt)).all()
+
+        submenu_responses = [
+            SubmenuInfoResponse(
                 id=submenu.id,
                 title=submenu.title,
                 description=submenu.description,
                 menu_id=submenu.menu_id,
-                dishes_count=submenu.num_dishes,
+                dishes_count=dishes_count,
             )
-            submenu_responses.append(submenu_response)
+            for submenu, dishes_count in submenus_with_counts
+        ]
+
         return submenu_responses
 
     async def get_submenu_db(self, submenu_id: UUID) -> Submenu:
         """Get submenu by submenu_id."""
         return await self.get(submenu_id)
+
+    async def get_submenu_with_count_db(
+        self, submenu_id: UUID
+    ) -> Optional[SubmenuInfoResponse]:
+        """ "Get submenu with count of dishes from database."""
+        stmt = (
+            select(Submenu, func.count(Submenu.dishes).label("dishes_count"))
+            .join(Submenu.dishes, isouter=True)
+            .where(Submenu.id == submenu_id)
+            .group_by(Submenu)
+        )
+        submenu_with_counts = (await self._session.execute(stmt)).first()
+
+        if submenu_with_counts:
+            submenu, dishes_count = submenu_with_counts
+            response = SubmenuInfoResponse(
+                id=submenu.id,
+                title=submenu.title,
+                description=submenu.description,
+                menu_id=submenu.menu_id,
+                dishes_count=dishes_count,
+            )
+            return response
+
+        raise exceptions.ObjectNotFoundError("submenu not found")
 
     async def create_submenu_db(
         self, menu_id: UUID, schema: MenuRequest
