@@ -6,7 +6,7 @@ authors = ["Mark Krylov"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "3.10.12"
 fastapi = "^0.100.0"
 uvicorn = "^0.23.1"
 alembic = "^1.11.1"
@@ -14,10 +14,23 @@ sqlalchemy = "^2.0.19"
 fastapi-restful = "^0.4.5"
 asyncpg = "^0.28.0"
 python-dotenv = "^1.0.0"
+pytest = "^7.4.0"
+httpx = "^0.24.1"
+pytest-asyncio = "^0.21.1"
+trio = "^0.22.2"
+faker = "^19.2.0"
+pytest-ordering = "^0.6"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
 black = "^23.7.0"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]
+asyncio_mode="auto"
+addopts = "-vv"
 
 [tool.black]
 line-length = 79
