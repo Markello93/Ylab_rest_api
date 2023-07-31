@@ -13,7 +13,6 @@ async def test_menu(ac: AsyncClient, menu_data, test_ids):
     ), f"Expected status code 201, got {response.status_code} instead"
 
     response_json = response.json()
-    print(response_json)
     assert "id" in response_json, "menu_id not received"
     assert response_json["title"] == menu_data["title"], "Unexpected title"
     assert (
