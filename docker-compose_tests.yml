@@ -2,23 +2,18 @@ version: '3.8'
 
 services:
   postgres:
-    container_name: postgres-rest
     image: postgres:15.1-alpine
-    restart: on-failure
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - 5432:5432
+    container_name: tests_db
+    command: -p 6000
+    expose:
+      - 6000
     env_file:
       - .env
+    environment:
+      - LANG=en_US.utf8
+      - LC_ALL=en_US.utf8
     networks:
       - test_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d","postgres-rest"]
-      interval: 10s
-      timeout: 30s
-      retries: 5
-      start_period: 80s
 
   test:
     build:
@@ -28,19 +23,12 @@ services:
     container_name: test
     volumes:
       - .:/app
-    restart: always
     tty: true
-    ports:
-      - "8000:8000"
     depends_on:
-       postgres:
-         condition: service_healthy
+       - postgres
     networks:
       - test_network
+    command: pytest
 
 networks:
   test_network:
-    driver: bridge
-
-volumes:
-  postgres_data:

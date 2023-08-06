@@ -1,14 +1,14 @@
+from uuid import UUID
+
+from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
-from typing import List, Optional
-from uuid import UUID
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.menu_response import MenuInfResponse
 from src.core import exceptions
-from src.db.models import Dish, Menu, Submenu
 from src.db.db import get_session
+from src.db.models import Dish, Menu, Submenu
 from src.repositories.abstract_repository import AbstractRepository
 
 
@@ -24,13 +24,13 @@ class MenuRepository(AbstractRepository):
 
     async def get_menu_db_with_counts(
         self, menu_id: UUID
-    ) -> Optional[MenuInfResponse]:
+    ) -> MenuInfResponse:
         """Get menu by menu_id with submenu and dish counts."""
         stmt = (
             select(
                 Menu,
-                func.count(Submenu.id.distinct()).label("submenus_count"),
-                func.count(Dish.id.distinct()).label("dishes_count"),
+                func.count(Submenu.id.distinct()).label('submenus_count'),
+                func.count(Dish.id.distinct()).label('dishes_count'),
             )
             .outerjoin(Submenu, Menu.submenus)
             .outerjoin(Dish, Submenu.dishes)
@@ -50,15 +50,15 @@ class MenuRepository(AbstractRepository):
             )
             return menu_response
 
-        raise exceptions.ObjectNotFoundError("menu not found")
+        raise exceptions.ObjectNotFoundError('menu not found')
 
-    async def get_list_of_menus_db(self) -> List[MenuInfResponse]:
+    async def get_list_of_menus_db(self) -> list[MenuInfResponse]:
         """Get list of menus with quantity of submenus and dishes."""
         stmt = (
             select(
                 Menu,
-                func.count(Submenu.id).label("submenus_count"),
-                func.count(Dish.id).label("dishes_count"),
+                func.count(Submenu.id).label('submenus_count'),
+                func.count(Dish.id).label('dishes_count'),
             )
             .join(Menu.submenus, isouter=True)
             .join(Submenu.dishes, isouter=True)
