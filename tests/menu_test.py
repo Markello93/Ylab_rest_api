@@ -10,7 +10,7 @@ fake = Faker()
 
 
 @pytest.mark.run(order=1)
-async def test_get_empty_menu_list(ac: AsyncClient):
+async def test_get_empty_menu_list(ac: AsyncClient) -> None:
     response = await ac.get('/api/v1/menus/')
     assert (
         response.status_code == 200
@@ -22,8 +22,8 @@ async def test_get_empty_menu_list(ac: AsyncClient):
 @pytest.mark.run(order=2)
 @pytest.mark.parametrize('menu_data', [{}], indirect=True, ids=['create_menu'])
 async def test_create(
-    ac: AsyncClient, menu_data, test_ids
-):
+    ac: AsyncClient, menu_data: dict[str, str], test_ids: dict[str, str]
+) -> None:
     async with async_session_maker() as session:
         response = await ac.post('/api/v1/menus/', json=menu_data)
         assert (
@@ -45,7 +45,12 @@ async def test_create(
 
 @pytest.mark.run(order=3)
 @pytest.mark.parametrize('menu_data', [{}], indirect=True, ids=['patch_menu'])
-async def test_patch(ac: AsyncClient, test_ids, menu_data, last_menu_data):
+async def test_patch(
+    ac: AsyncClient,
+    test_ids: dict[str, str],
+    menu_data: dict[str, str],
+    last_menu_data: dict[str, str],
+) -> None:
     response = await ac.patch(
         f"/api/v1/menus/{test_ids['menu_id']}", json=menu_data
     )
@@ -64,7 +69,9 @@ async def test_patch(ac: AsyncClient, test_ids, menu_data, last_menu_data):
 
 
 @pytest.mark.run(order=4)
-async def test_get_menu(ac: AsyncClient, test_ids, last_menu_data):
+async def test_get_menu(
+    ac: AsyncClient, test_ids: dict[str, str], last_menu_data: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 200
@@ -82,7 +89,7 @@ async def test_get_menu(ac: AsyncClient, test_ids, last_menu_data):
 
 
 @pytest.mark.run(order=5)
-async def test_get_menu_list(ac: AsyncClient):
+async def test_get_menu_list(ac: AsyncClient) -> None:
     response = await ac.get('/api/v1/menus/')
     assert (
         response.status_code == 200
@@ -94,7 +101,7 @@ async def test_get_menu_list(ac: AsyncClient):
 
 
 @pytest.mark.run(order=20)
-async def test_del_menu(ac: AsyncClient, test_ids):
+async def test_del_menu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
     response = await ac.delete(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 200
@@ -102,7 +109,9 @@ async def test_del_menu(ac: AsyncClient, test_ids):
 
 
 @pytest.mark.run(order=21)
-async def test_get_nonexistent_menu(ac: AsyncClient, test_ids):
+async def test_get_nonexistent_menu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 404

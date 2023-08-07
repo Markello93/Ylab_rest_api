@@ -10,7 +10,9 @@ fake = Faker()
 
 
 @pytest.mark.run(order=11)
-async def test_get_empty_dishes_list(ac: AsyncClient, test_ids):
+async def test_get_empty_dishes_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}/dishes/"
     )
@@ -24,10 +26,8 @@ async def test_get_empty_dishes_list(ac: AsyncClient, test_ids):
 @pytest.mark.run(order=12)
 @pytest.mark.parametrize('dish_data', [{}], indirect=True, ids=['create_dish'])
 async def test_create(
-    ac: AsyncClient,
-    dish_data,
-    test_ids
-):
+    ac: AsyncClient, dish_data: dict[str, str], test_ids: dict[str, str]
+) -> None:
     async with async_session_maker() as session:
         response = await ac.post(
             f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}/dishes/",
@@ -55,10 +55,10 @@ async def test_create(
 @pytest.mark.parametrize('dish_data', [{}], indirect=True, ids=['patch_dish'])
 async def test_patch(
     ac: AsyncClient,
-    dish_data,
-    test_ids,
-    last_dish_data,
-):
+    dish_data: dict[str, str],
+    test_ids: dict[str, str],
+    last_dish_data: dict[str, str],
+) -> None:
     response = await ac.patch(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/"
         f"{test_ids['submenu_id']}/dishes/{test_ids['dish_id']}",
@@ -81,7 +81,9 @@ async def test_patch(
 
 
 @pytest.mark.run(order=14)
-async def test_get_dish(ac: AsyncClient, last_dish_data, test_ids):
+async def test_get_dish(
+    ac: AsyncClient, last_dish_data: dict[str, str], test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/"
         f"{test_ids['submenu_id']}/dishes/{test_ids['dish_id']}"
@@ -98,7 +100,9 @@ async def test_get_dish(ac: AsyncClient, last_dish_data, test_ids):
 
 
 @pytest.mark.run(order=15)
-async def test_get_dishes_list(ac: AsyncClient, test_ids):
+async def test_get_dishes_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/"
         f"{test_ids['submenu_id']}/dishes/"
@@ -111,7 +115,7 @@ async def test_get_dishes_list(ac: AsyncClient, test_ids):
 
 
 @pytest.mark.run(order=16)
-async def test_del_dish(ac: AsyncClient, test_ids):
+async def test_del_dish(ac: AsyncClient, test_ids: dict[str, str]) -> None:
     response = await ac.delete(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/"
         f"{test_ids['submenu_id']}/dishes/{test_ids['dish_id']}"
@@ -123,8 +127,8 @@ async def test_del_dish(ac: AsyncClient, test_ids):
 
 @pytest.mark.run(order=17)
 async def test_get_nonexistent_dish(
-    ac: AsyncClient, test_ids
-):
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/"
         f"{test_ids['submenu_id']}/dishes/{test_ids['dish_id']}"
