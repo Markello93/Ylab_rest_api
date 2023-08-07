@@ -21,7 +21,7 @@ class MenuCBV:
     @menu_router.post(
         '/', response_model=MenuInfResponse, status_code=HTTPStatus.CREATED
     )
-    async def create_menu_router(self, schema: MenuRequest):
+    async def create_menu_router(self, schema: MenuRequest) -> MenuInfResponse:
         return await self.__menu_service.create_menu(schema)
 
     @menu_router.get(
@@ -29,24 +29,25 @@ class MenuCBV:
         response_model=MenuInfResponse,
         status_code=HTTPStatus.OK,
     )
-    async def get_menu_router(self, menu_id: UUID4):
+    async def get_menu_router(self, menu_id: UUID4) -> MenuInfResponse:
         return await self.__menu_service.get_menu(menu_id)
 
     @menu_router.patch(
         '/{menu_id}', response_model=MenuInfResponse, status_code=HTTPStatus.OK
     )
-    async def update_menu_router(self, menu_id: UUID4, schema: MenuRequest):
+    async def update_menu_router(self, menu_id: UUID4,
+                                 schema: MenuRequest) -> MenuInfResponse:
         return await self.__menu_service.update_menu(menu_id, schema)
 
     @menu_router.delete(
         '/{menu_id}', response_model=None, status_code=HTTPStatus.OK
     )
-    async def delete_menu_router(self, menu_id: UUID4):
+    async def delete_menu_router(self, menu_id: UUID4) -> None:
         await self.__menu_service.delete_menu(menu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
     @menu_router.get(
         '/', response_model=list[MenuInfResponse], status_code=HTTPStatus.OK
     )
-    async def get_menus_router(self):
+    async def get_menus_router(self) -> list[MenuInfResponse]:
         return await self.__menu_service.get_menus()

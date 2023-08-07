@@ -7,7 +7,9 @@ from tests.conftest import async_session_maker
 
 
 @pytest.mark.run(order=6)
-async def test_get_empty_submenu_list(ac: AsyncClient, test_ids):
+async def test_get_empty_submenu_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/")
     assert (
         response.status_code == 200
@@ -21,8 +23,8 @@ async def test_get_empty_submenu_list(ac: AsyncClient, test_ids):
     'menu_data', [{}], indirect=True, ids=['create_submenu']
 )
 async def test_create(
-    ac: AsyncClient, menu_data, test_ids
-):
+    ac: AsyncClient, menu_data: dict[str, str], test_ids: dict[str, str]
+) -> None:
     async with async_session_maker() as session:
         response = await ac.post(
             f"/api/v1/menus/{test_ids['menu_id']}/submenus/", json=menu_data
@@ -54,10 +56,10 @@ async def test_create(
 )
 async def test_patch(
     ac: AsyncClient,
-    menu_data,
-    test_ids,
-    last_submenu_data,
-):
+    menu_data: dict[str, str],
+    test_ids: dict[str, str],
+    last_submenu_data: dict[str, str],
+) -> None:
     response = await ac.patch(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}",
         json=menu_data,
@@ -80,8 +82,10 @@ async def test_patch(
 
 @pytest.mark.run(order=9)
 async def test_get_submenu(
-    ac: AsyncClient, test_ids, last_submenu_data
-):
+    ac: AsyncClient,
+    test_ids: dict[str, str],
+    last_submenu_data: dict[str, str],
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
     )
@@ -101,7 +105,9 @@ async def test_get_submenu(
 
 
 @pytest.mark.run(order=10)
-async def test_get_submenu_list(ac: AsyncClient, test_ids):
+async def test_get_submenu_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/")
     assert (
         response.status_code == 200
@@ -111,9 +117,7 @@ async def test_get_submenu_list(ac: AsyncClient, test_ids):
 
 
 @pytest.mark.run(order=18)
-async def test_del_submenu(
-    ac: AsyncClient, test_ids
-):
+async def test_del_submenu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
     response = await ac.delete(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
     )
@@ -124,8 +128,8 @@ async def test_del_submenu(
 
 @pytest.mark.run(order=19)
 async def test_get_nonexistent_submenu(
-    ac: AsyncClient, test_ids
-):
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
     )
