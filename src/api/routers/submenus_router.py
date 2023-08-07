@@ -1,20 +1,16 @@
 from http import HTTPStatus
-from typing import List
-from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from fastapi_restful.cbv import cbv
 from fastapi.responses import JSONResponse
+from fastapi_restful.cbv import cbv
+from pydantic import UUID4
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.submenu_response import (
-    SubmenuInfoResponse,
-    SubmenuResponse,
-)
+from src.api.response_models.submenu_response import SubmenuInfoResponse
 from src.services.submenus_service import SubmenuService
 
 submenus_router = APIRouter(
-    prefix="/menus/{menu_id}/submenus", tags=["Submenu"]
+    prefix='/menus/{menu_id}/submenus', tags=['Submenu']
 )
 
 
@@ -25,36 +21,35 @@ class SubmenuCBV:
     __submenu_service: SubmenuService = Depends()
 
     @submenus_router.post(
-        "/", response_model=SubmenuResponse, status_code=HTTPStatus.CREATED
+        '/', response_model=SubmenuInfoResponse, status_code=HTTPStatus.CREATED
     )
-    async def create_submenu_router(self, menu_id: UUID, schema: MenuRequest):
+    async def create_submenu_router(self, menu_id: UUID4, schema: MenuRequest):
         return await self.__submenu_service.create_submenu(menu_id, schema)
 
     @submenus_router.get(
-        "/{submenu_id}",
+        '/{submenu_id}',
         response_model=SubmenuInfoResponse,
         status_code=HTTPStatus.OK,
     )
-    async def get_submenu_router(self, submenu_id: UUID):
-        submenu = await self.__submenu_service.get_submenu(submenu_id)
-
-        return submenu
+    async def get_submenu_router(self, submenu_id: UUID4):
+        return await self.__submenu_service.get_submenu(submenu_id)
 
     @submenus_router.patch(
-        "/{submenu_id}",
-        response_model=SubmenuResponse,
+        '/{submenu_id}',
+        response_model=SubmenuInfoResponse,
         status_code=HTTPStatus.OK,
     )
     async def update_submenu_router(
-        self, submenu_id: UUID, schema: MenuRequest
+        self, submenu_id: UUID4, schema: MenuRequest
     ):
         return await self.__submenu_service.update_submenu(submenu_id, schema)
 
-    @submenus_router.delete("/{submenu_id}", status_code=HTTPStatus.OK)
-    async def delete_menu_router(self, submenu_id: UUID):
-        await self.__submenu_service.delete_submenu(submenu_id)
+    @submenus_router.delete('/{submenu_id}', response_model=None, status_code=HTTPStatus.OK
+                            )
+    async def delete_submenu_router(self, menu_id: UUID4, submenu_id: UUID4):
+        await self.__submenu_service.delete_submenu(menu_id, submenu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
-    @submenus_router.get("/", response_model=List[SubmenuInfoResponse])
-    async def get_submenus_router(self, menu_id: UUID):
+    @submenus_router.get('/', response_model=list[SubmenuInfoResponse])
+    async def get_submenus_router(self, menu_id: UUID4):
         return await self.__submenu_service.list_all_submenus(menu_id)

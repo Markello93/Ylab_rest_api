@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres:15.1-alpine
     container_name: tests_db
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data/
     command: -p 6000
     expose:
       - 6000
@@ -14,6 +16,26 @@ services:
       - LC_ALL=en_US.utf8
     networks:
       - test_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_test_data:/data
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+    networks:
+      - test_network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
 
   test:
     build:
@@ -32,3 +54,7 @@ services:
 
 networks:
   test_network:
+
+volumes:
+  postgres_test_data:
+  redis_test_data:

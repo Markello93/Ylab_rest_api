@@ -6,7 +6,7 @@ authors = ["Mark Krylov"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.10"
+python = "3.10.12"
 fastapi = "^0.100.0"
 uvicorn = "^0.23.1"
 alembic = "^1.11.1"
@@ -22,6 +22,7 @@ faker = "^19.2.0"
 pytest-ordering = "^0.6"
 redis = "^4.6.0"
 pre-commit = "^3.3.3"
+types-redis = "^4.6.0.3"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"

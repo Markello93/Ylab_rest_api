@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     DB_NAME_TEST: str
     DB_USER_TEST: str
     DB_PASS_TEST: str
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_DB: int
+    REDIS_CACHE_LIFETIME: int
 
     @property
     def database_url(self) -> str:
@@ -35,6 +39,13 @@ class Settings(BaseSettings):
             f'postgresql+asyncpg://'
             f'{self.DB_USER_TEST}:{self.DB_PASS_TEST}'
             f'@{self.DB_HOST_TEST}:{self.DB_PORT_TEST}/{self.DB_NAME_TEST}'
+        )
+
+    @property
+    def redis_url(self) -> str:
+        """Get link for redis connection."""
+        return (
+            f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0'
         )
 
     class Config:

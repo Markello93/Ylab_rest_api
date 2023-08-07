@@ -20,7 +20,7 @@ class MenuRepository(AbstractRepository):
 
     async def get_menu_db(self, menu_id: UUID):
         """Get menu by menu_id."""
-        return await self.get(menu_id)
+        return await self.get_instance(menu_id)
 
     async def get_menu_db_with_counts(
         self, menu_id: UUID

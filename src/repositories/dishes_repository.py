@@ -19,7 +19,7 @@ class DishRepository(AbstractRepository):
 
     async def get_dish_db(self, dish_id: UUID) -> Dish:
         """Get dish by dish_id."""
-        return await self.get(dish_id)
+        return await self.get_instance(dish_id)
 
     async def get_list_of_dishes_db(
         self, menu_id: UUID, submenu_id: UUID
@@ -44,7 +44,7 @@ class DishRepository(AbstractRepository):
         """Create dish object in the database."""
         submenu = await self._session.get(Submenu, submenu_id)
         if submenu is None:
-            raise exceptions.ObjectNotFoundError('Submenu not found')
+            raise exceptions.ObjectNotFoundError('submenu not found')
         dish = Dish(
             title=schema.title,
             description=schema.description,

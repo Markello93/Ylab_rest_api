@@ -43,9 +43,9 @@ class SubmenuRepository(AbstractRepository):
 
         return submenu_responses
 
-    async def get_submenu_db(self, submenu_id: UUID) -> Submenu:
+    async def get_submenu_db(self, submenu_id: UUID):
         """Get submenu by submenu_id."""
-        return await self.get(submenu_id)
+        return await self.get_instance(submenu_id)
 
     async def get_submenu_with_count_db(
         self, submenu_id: UUID
@@ -78,7 +78,7 @@ class SubmenuRepository(AbstractRepository):
         """Create submenu object in the database."""
         menu = await self._session.get(Menu, menu_id)
         if menu is None:
-            raise exceptions.ObjectNotFoundError('Menu not found')
+            raise exceptions.ObjectNotFoundError('menu not found')
         submenu = Submenu(
             title=schema.title, description=schema.description, menu_id=menu_id
         )
@@ -94,6 +94,6 @@ class SubmenuRepository(AbstractRepository):
         return await self.update(submenu)
 
     async def delete_submenu_db(self, submenu_id: UUID) -> None:
-        """Delete submenu object from the database."""
+        """Delete menu object from the database."""
         submenu = await self.get_submenu_db(submenu_id)
         await self.delete(submenu.id)

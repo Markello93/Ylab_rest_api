@@ -1,17 +1,4 @@
-from pydantic import BaseModel, UUID4
-
-
-class SubmenuInfoResponse(BaseModel):
-    """Response model for submenu with count of dishes."""
-
-    id: UUID4
-    title: str
-    description: str
-    menu_id: UUID4
-    dishes_count: int
-
-    class Config:
-        orm_mode = True
+from pydantic import UUID4, BaseModel
 
 
 class SubmenuResponse(BaseModel):
@@ -20,7 +7,15 @@ class SubmenuResponse(BaseModel):
     id: UUID4
     title: str
     description: str
+
+    class Config:
+        orm_mode = True
+
+
+class SubmenuInfoResponse(SubmenuResponse):
+    """Response model for submenu with count of dishes."""
     menu_id: UUID4
+    dishes_count: int | None = 0
 
     class Config:
         orm_mode = True
