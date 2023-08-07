@@ -36,18 +36,18 @@ DB_PORT=5432    # порт, на котором работает база дан
 POSTGRES_USER=postgres      # имя суперпользователя postgres
 POSTGRES_PASSWORD=postgres  # пароль суперпользователя
 # Настройки приложения cargo
-RESTO_APP_DB_NAME=postgres                     # название тестовой БД
+RESTO_APP_DB_NAME=postgres                     # название БД
 RESTO_APP_DB_USER=postgres                     # имя пользователя БД сервиса
 RESTO_APP_DB_PASSWORD='пароль от базы данных'  # Пароль пользователя БД
 # Настройки тестового контейнера
-DB_HOST_TEST=tests_db
-DB_PORT_TEST=6000
+DB_HOST_TEST=tests_db                   # имя хоста (контейнера) БД
+DB_PORT_TEST=6000                       # порт для запуска тестовой БД
 DB_NAME_TEST=postgres                   # название тестовой БД
 DB_USER_TEST=postgres                   # имя пользователя тестовой БД
 DB_PASS_TEST='пароль от базы данных'    # Пароль пользователя БД
 # Настройки для подключения Redis для тестового контейнера и основного проекта
 REDIS_HOST=redis                         # название тестовой БД redis
-REDIS_PORT=6379                         # порт, на котором работает база данных
+REDIS_PORT=6379                         # порт, на котором работает Бд
 REDIS_CACHE_LIFETIME = 360              # время хранения кэша
 REDIS_DB=0                              # номер БД Redis
 ```
@@ -66,7 +66,7 @@ docker-compose up -d
 docker-compose -f docker-compose_tests.yml up --abort-on-container-exit && docker-compose -f docker-compose_tests.yml  down -v
 ```
 ## Стек технологий, использованных в проекте
-* python 3.11
+* python 3.10
 * fastapi
 * pydantic
 * alembic
