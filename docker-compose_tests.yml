@@ -2,23 +2,40 @@ version: '3.8'
 
 services:
   postgres:
-    container_name: postgres-rest
     image: postgres:15.1-alpine
-    restart: on-failure
+    container_name: tests_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_test_data:/var/lib/postgresql/data/
+    command: -p 6000
+    expose:
+      - 6000
+    env_file:
+      - .env
+    environment:
+      - LANG=en_US.utf8
+      - LC_ALL=en_US.utf8
+    networks:
+      - test_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_test_data:/data
+    expose:
+      - "6379"
     ports:
-      - 5432:5432
+      - "6379:6379"
     env_file:
       - .env
     networks:
       - test_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d","postgres-rest"]
-      interval: 10s
-      timeout: 30s
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
       retries: 5
-      start_period: 80s
 
   test:
     build:
@@ -28,19 +45,16 @@ services:
     container_name: test
     volumes:
       - .:/app
-    restart: always
     tty: true
-    ports:
-      - "8000:8000"
     depends_on:
-       postgres:
-         condition: service_healthy
+       - postgres
     networks:
       - test_network
+    command: pytest
 
 networks:
   test_network:
-    driver: bridge
 
 volumes:
-  postgres_data:
+  postgres_test_data:
+  redis_test_data:

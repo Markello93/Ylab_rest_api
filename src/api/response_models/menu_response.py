@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4
+from pydantic import UUID4, BaseModel
 
 
 class MenuResponse(BaseModel):
@@ -12,14 +12,11 @@ class MenuResponse(BaseModel):
         orm_mode = True
 
 
-class MenuInfResponse(BaseModel):
+class MenuInfResponse(MenuResponse):
     """Response model for menu with count of submenus and dishes."""
 
-    id: UUID4
-    title: str
-    description: str
-    submenus_count: int
-    dishes_count: int
+    submenus_count: int | None = 0
+    dishes_count: int | None = 0
 
     class Config:
         orm_mode = True

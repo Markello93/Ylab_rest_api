@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import Depends
@@ -21,10 +20,10 @@ class SubmenuRepository(AbstractRepository):
 
     async def get_list_of_submenus_db(
         self, menu_id: UUID
-    ) -> List[SubmenuInfoResponse]:
+    ) -> list[SubmenuInfoResponse]:
         """Get all submenus for menu with quantity of dishes from database."""
         stmt = (
-            select(Submenu, func.count(Submenu.dishes).label("dishes_count"))
+            select(Submenu, func.count(Submenu.dishes).label('dishes_count'))
             .join(Submenu.dishes, isouter=True)
             .where(Submenu.menu_id == menu_id)
             .group_by(Submenu)
@@ -44,16 +43,16 @@ class SubmenuRepository(AbstractRepository):
 
         return submenu_responses
 
-    async def get_submenu_db(self, submenu_id: UUID) -> Submenu:
+    async def get_submenu_db(self, submenu_id: UUID):
         """Get submenu by submenu_id."""
-        return await self.get(submenu_id)
+        return await self.get_instance(submenu_id)
 
     async def get_submenu_with_count_db(
         self, submenu_id: UUID
-    ) -> Optional[SubmenuInfoResponse]:
-        """ "Get submenu with count of dishes from database."""
+    ) -> SubmenuInfoResponse:
+        """ Get submenu with count of dishes from database."""
         stmt = (
-            select(Submenu, func.count(Submenu.dishes).label("dishes_count"))
+            select(Submenu, func.count(Submenu.dishes).label('dishes_count'))
             .join(Submenu.dishes, isouter=True)
             .where(Submenu.id == submenu_id)
             .group_by(Submenu)
@@ -71,7 +70,7 @@ class SubmenuRepository(AbstractRepository):
             )
             return response
 
-        raise exceptions.ObjectNotFoundError("submenu not found")
+        raise exceptions.ObjectNotFoundError('submenu not found')
 
     async def create_submenu_db(
         self, menu_id: UUID, schema: MenuRequest
@@ -79,7 +78,7 @@ class SubmenuRepository(AbstractRepository):
         """Create submenu object in the database."""
         menu = await self._session.get(Menu, menu_id)
         if menu is None:
-            raise exceptions.ObjectNotFoundError("Menu not found")
+            raise exceptions.ObjectNotFoundError('menu not found')
         submenu = Submenu(
             title=schema.title, description=schema.description, menu_id=menu_id
         )
@@ -95,6 +94,6 @@ class SubmenuRepository(AbstractRepository):
         return await self.update(submenu)
 
     async def delete_submenu_db(self, submenu_id: UUID) -> None:
-        """Delete submenu object from the database."""
+        """Delete menu object from the database."""
         submenu = await self.get_submenu_db(submenu_id)
         await self.delete(submenu.id)

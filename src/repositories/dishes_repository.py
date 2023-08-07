@@ -1,15 +1,13 @@
-from sqlalchemy import select
-
-from src.api.request_models.request_base import DishRequest
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
-from typing import List, Optional
 from uuid import UUID
 
+from fastapi import Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.api.request_models.request_base import DishRequest
 from src.core import exceptions
-from src.db.models import Dish, Menu, Submenu
 from src.db.db import get_session
+from src.db.models import Dish, Menu, Submenu
 from src.repositories.abstract_repository import AbstractRepository
 
 
@@ -21,11 +19,11 @@ class DishRepository(AbstractRepository):
 
     async def get_dish_db(self, dish_id: UUID) -> Dish:
         """Get dish by dish_id."""
-        return await self.get(dish_id)
+        return await self.get_instance(dish_id)
 
     async def get_list_of_dishes_db(
         self, menu_id: UUID, submenu_id: UUID
-    ) -> List[Optional[Dish]]:
+    ) -> list[Dish | None]:
         """Get all dishes for submenu."""
         stmt = (
             select(Dish)
@@ -46,7 +44,7 @@ class DishRepository(AbstractRepository):
         """Create dish object in the database."""
         submenu = await self._session.get(Submenu, submenu_id)
         if submenu is None:
-            raise exceptions.ObjectNotFoundError("Submenu not found")
+            raise exceptions.ObjectNotFoundError('submenu not found')
         dish = Dish(
             title=schema.title,
             description=schema.description,
