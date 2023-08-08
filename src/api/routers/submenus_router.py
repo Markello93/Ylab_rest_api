@@ -23,7 +23,7 @@ class SubmenuCBV:
     @submenus_router.post(
         '/', response_model=SubmenuInfoResponse, status_code=HTTPStatus.CREATED
     )
-    async def create_submenu_router(self, menu_id: UUID4, schema: MenuRequest):
+    async def create_submenu_router(self, menu_id: UUID4, schema: MenuRequest) -> SubmenuInfoResponse:
         return await self.__submenu_service.create_submenu(menu_id, schema)
 
     @submenus_router.get(
@@ -31,7 +31,7 @@ class SubmenuCBV:
         response_model=SubmenuInfoResponse,
         status_code=HTTPStatus.OK,
     )
-    async def get_submenu_router(self, menu_id: UUID4, submenu_id: UUID4):
+    async def get_submenu_router(self, menu_id: UUID4, submenu_id: UUID4) -> SubmenuInfoResponse:
         return await self.__submenu_service.get_submenu(menu_id, submenu_id)
 
     @submenus_router.patch(
@@ -41,15 +41,15 @@ class SubmenuCBV:
     )
     async def update_submenu_router(
         self, submenu_id: UUID4, schema: MenuRequest
-    ):
+    ) -> SubmenuInfoResponse:
         return await self.__submenu_service.update_submenu(submenu_id, schema)
 
     @submenus_router.delete('/{submenu_id}', response_model=None, status_code=HTTPStatus.OK
                             )
-    async def delete_submenu_router(self, menu_id: UUID4, submenu_id: UUID4):
+    async def delete_submenu_router(self, menu_id: UUID4, submenu_id: UUID4) -> JSONResponse:
         await self.__submenu_service.delete_submenu(menu_id, submenu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
     @submenus_router.get('/', response_model=list[SubmenuInfoResponse])
     async def get_submenus_router(self, menu_id: UUID4):
-        return await self.__submenu_service.list_all_submenus(menu_id)
+        return await self.__submenu_service.get_submenus(menu_id)

@@ -1,3 +1,4 @@
+import functools
 import pickle
 from typing import Any
 
@@ -7,70 +8,63 @@ from redis.asyncio.connection import ConnectionPool
 from src.core.settings import settings
 
 
+def with_redis_connection(func):
+    @functools.wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        redis_conn = await self.get_redis_connection()
+        try:
+            return await func(self, redis_conn, *args, **kwargs)
+        finally:
+            await redis_conn.close()
+    return wrapper
+
+
 class CacheService:
     def __init__(self):
         self.redis_url: str = settings.redis_url
         self.lifetime: int = settings.REDIS_CACHE_LIFETIME
 
-    async def get_redis_connection(self):
+    async def get_redis_connection(self) -> aioredis.Redis | None:
+        """Get connection for Redis DB"""
         pool = ConnectionPool.from_url(self.redis_url)
         return await aioredis.Redis(connection_pool=pool)
 
-    async def set_cache(self, key: str, value: Any) -> None:
+    @with_redis_connection
+    async def set_cache(self, redis_conn, key: str, value: Any) -> None:
+        """Set cache for object in redis DB."""
         value = pickle.dumps(value)
-        redis_conn = await self.get_redis_connection()
-        try:
-            await redis_conn.set(key, value, ex=self.lifetime)
-        finally:
-            await redis_conn.close()
+        await redis_conn.set(key, value, ex=self.lifetime)
 
-    async def get_cache(self, key: str) -> Any:
-        redis_conn = await self.get_redis_connection()
-        try:
-            cache = await redis_conn.get(key)
-            if cache:
-                return pickle.loads(cache)
-            return None
-        finally:
-            await redis_conn.close()
+    @with_redis_connection
+    async def get_cache(self, redis_conn, key: str) -> Any:
+        """Get cache for object in redis DB."""
+        cache = await redis_conn.get(key)
+        if cache:
+            return pickle.loads(cache)
+        return None
 
-    async def delete_cache(self, key: str) -> None:
-        redis_conn = await self.get_redis_connection()
-        print(key)
-        try:
-            await redis_conn.delete(key)
-        finally:
-            await redis_conn.close()
+    @with_redis_connection
+    async def delete_cache(self, redis_conn, key: str) -> None:
+        """Delete cache for object."""
+        await redis_conn.delete(key)
 
-    async def invalidate_cache_for_menu(self, menu_id: str) -> None:
-        redis_conn = await self.get_redis_connection()
-        try:
-            keys = await redis_conn.keys(f'menu_id-{menu_id}*')
-            print(keys)
-            for key in keys:
-                print(key)
-                await redis_conn.delete(key)
+    @with_redis_connection
+    async def invalidate_cache_for_menu(self, redis_conn, menu_id: str) -> None:
+        """Delete cache for menu and all related submenus and dishes."""
+        keys = await redis_conn.keys(f'menu_id-{menu_id}*')
+        if keys:
+            await redis_conn.delete(*keys)
 
-        finally:
-            await redis_conn.close()
+    @with_redis_connection
+    async def invalidate_cache_for_submenu(
+        self, redis_conn, menu_id: str, submenu_id: str
+    ) -> None:
+        """Delete cache for submenu and all related dishes."""
+        keys = await redis_conn.keys(f'menu_id-{menu_id}:submenu_id-{submenu_id}*')
+        if keys:
+            await redis_conn.delete(*keys)
 
-    async def invalidate_cache_for_submenu(self, menu_id: str, submenu_id: str) -> None:
-        redis_conn = await self.get_redis_connection()
-        try:
-            keys = await redis_conn.keys(
-                f'menu_id-{menu_id}:submenu_id-{submenu_id}*')
-            print(keys)
-            for key in keys:
-                print(key)
-                await redis_conn.delete(key)
-            await redis_conn.delete(submenu_id)
-        finally:
-            await redis_conn.close()
-
-    async def flush_redis(self) -> None:
-        """Очистка всего кэша."""
-        redis_conn = await self.get_redis_connection()
-        try:
-            await redis_conn.flushdb()
-        finally:
-            await redis_conn.close()
+    @with_redis_connection
+    async def flush_redis(self, redis_conn) -> None:
+        """Clear all cache."""
+        await redis_conn.flushdb()

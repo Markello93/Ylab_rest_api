@@ -4,11 +4,12 @@ from fastapi.exceptions import HTTPException
 
 
 class ObjectAlreadyExistsError(HTTPException):
-    """ Exception for existed object."""
+    """Exception for existing object."""
 
-    def __init__(self, instance):
-        self.detail = f'Object {instance!r} already exists.'
-        self.status_code = HTTPStatus.BAD_REQUEST
+    def __init__(self, message: str):
+        detail = message
+        status_code = HTTPStatus.BAD_REQUEST
+        super().__init__(status_code, detail=detail)
 
 
 class ObjectNotFoundError(HTTPException):

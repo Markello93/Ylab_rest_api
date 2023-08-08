@@ -42,7 +42,7 @@ class MenuCBV:
     @menu_router.delete(
         '/{menu_id}', response_model=None, status_code=HTTPStatus.OK
     )
-    async def delete_menu_router(self, menu_id: UUID4) -> None:
+    async def delete_menu_router(self, menu_id: UUID4) -> JSONResponse:
         await self.__menu_service.delete_menu(menu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
