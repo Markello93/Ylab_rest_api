@@ -31,8 +31,8 @@ class SubmenuCBV:
         response_model=SubmenuInfoResponse,
         status_code=HTTPStatus.OK,
     )
-    async def get_submenu_router(self, submenu_id: UUID4):
-        return await self.__submenu_service.get_submenu(submenu_id)
+    async def get_submenu_router(self, menu_id: UUID4, submenu_id: UUID4):
+        return await self.__submenu_service.get_submenu(menu_id, submenu_id)
 
     @submenus_router.patch(
         '/{submenu_id}',

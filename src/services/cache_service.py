@@ -36,8 +36,34 @@ class CacheService:
 
     async def delete_cache(self, key: str) -> None:
         redis_conn = await self.get_redis_connection()
+        print(key)
         try:
             await redis_conn.delete(key)
+        finally:
+            await redis_conn.close()
+
+    async def invalidate_cache_for_menu(self, menu_id: str) -> None:
+        redis_conn = await self.get_redis_connection()
+        try:
+            keys = await redis_conn.keys(f'menu_id-{menu_id}*')
+            print(keys)
+            for key in keys:
+                print(key)
+                await redis_conn.delete(key)
+
+        finally:
+            await redis_conn.close()
+
+    async def invalidate_cache_for_submenu(self, menu_id: str, submenu_id: str) -> None:
+        redis_conn = await self.get_redis_connection()
+        try:
+            keys = await redis_conn.keys(
+                f'menu_id-{menu_id}:submenu_id-{submenu_id}*')
+            print(keys)
+            for key in keys:
+                print(key)
+                await redis_conn.delete(key)
+            await redis_conn.delete(submenu_id)
         finally:
             await redis_conn.close()
 
