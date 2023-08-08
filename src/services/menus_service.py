@@ -21,16 +21,16 @@ class MenuService:
 
     async def create_menu(self, schema: MenuRequest) -> MenuInfResponse:
         menu = await self._menu_repository.create_menu_db(schema)
-        await self._cache_service.set_cache(str(menu.id), menu)
+        await self._cache_service.set_cache(f'menu_id-{str(menu.id)}', menu)
         return menu
 
     async def update_menu(self, menu_id: UUID, schema: MenuRequest) -> MenuInfResponse:
         menu = await self._menu_repository.update_menu_db(menu_id, schema)
-        await self._cache_service.set_cache(str(menu.id), menu)
+        await self._cache_service.set_cache(f'menu_id-{str(menu.id)}', menu)
         return menu
 
     async def get_menu(self, menu_id: UUID) -> MenuInfResponse:
-        cached_menu = await self._cache_service.get_cache(str(menu_id))
+        cached_menu = await self._cache_service.get_cache(f'menu_id-{str(menu_id)}')
         if cached_menu is None or not hasattr(cached_menu, 'submenus_count'):
             menu_response = await self._menu_repository.get_menu_db_with_counts(menu_id)
             await self._cache_service.set_cache(str(menu_id), menu_response)
@@ -38,7 +38,7 @@ class MenuService:
         return cached_menu
 
     async def delete_menu(self, menu_id: UUID):
-        await self._cache_service.delete_cache(str(menu_id))
+        await self._cache_service.invalidate_cache_for_menu(str(menu_id))
         await self._menu_repository.delete_menu_db(menu_id)
 
     async def get_menus(self):
@@ -51,5 +51,6 @@ class MenuService:
         updated_menus = await self._menu_repository.get_list_of_menus_db()
         if cached_menus != updated_menus:
             await self._cache_service.set_cache('list_menus', updated_menus)
+            return updated_menus
 
-        return updated_menus
+        return cached_menus

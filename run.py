@@ -8,7 +8,7 @@ app = create_app()
 
 @app.on_event('shutdown')
 async def shutdown() -> None:
-    """ Очистка Кэша при завершении работы приложения."""
+    """ Clear cache after app shutdown."""
     service = CacheService()
     await service.flush_redis()
 
