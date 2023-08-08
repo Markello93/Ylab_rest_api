@@ -44,7 +44,8 @@ class AbstractRepository(Generic[DatabaseModel], abc.ABC):
             await self._session.commit()
         except IntegrityError:
             await self._session.rollback()
-            raise exceptions.ObjectAlreadyExistsError(instance)
+            raise exceptions.ObjectAlreadyExistsError(
+                'Object with this title already exists.')
 
         return instance
 

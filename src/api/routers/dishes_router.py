@@ -23,7 +23,7 @@ class DishCBV:
 
     @dishes_router.post(
         '/',
-        response_model=Optional[DishResponse],
+        response_model=DishResponse,
         status_code=HTTPStatus.CREATED,
     )
     async def create_dish_router(self, menu_id: UUID4, submenu_id: UUID4, schema: DishRequest) -> DishResponse:
@@ -48,7 +48,7 @@ class DishCBV:
     @dishes_router.delete(
         '/{dish_id}', response_model=None, status_code=HTTPStatus.OK
     )
-    async def delete_dish_router(self, menu_id: UUID4, submenu_id: UUID4, dish_id: UUID4) -> None:
+    async def delete_dish_router(self, menu_id: UUID4, submenu_id: UUID4, dish_id: UUID4) -> JSONResponse:
         await self.__dish_service.delete_dish(menu_id, submenu_id, dish_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
@@ -56,5 +56,5 @@ class DishCBV:
         '/', response_model=list[DishResponse], status_code=HTTPStatus.OK
     )
     async def get_dishes_router(self, menu_id: UUID4, submenu_id: UUID4) -> list[
-            DishResponse | None]:
+            DishResponse]:
         return await self.__dish_service.get_dishes(menu_id, submenu_id)

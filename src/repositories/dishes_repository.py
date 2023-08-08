@@ -23,7 +23,7 @@ class DishRepository(AbstractRepository):
 
     async def get_list_of_dishes_db(
         self, menu_id: UUID, submenu_id: UUID
-    ) -> list[Dish | None]:
+    ) -> list[Dish]:
         """Get all dishes for submenu."""
         stmt = (
             select(Dish)
