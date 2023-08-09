@@ -13,7 +13,7 @@ class ObjectAlreadyExistsError(HTTPException):
 
 
 class ObjectNotFoundError(HTTPException):
-    """" Exception for 404 error."""
+    """ Exception for 404 error."""
 
     def __init__(self, message: str):
         self.detail = message

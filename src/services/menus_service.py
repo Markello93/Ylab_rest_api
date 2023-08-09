@@ -37,13 +37,9 @@ class MenuService:
 
     async def get_menu(self, menu_id: UUID) -> MenuInfResponse:
         """Service function for get object menu from DB or redis cache."""
-        cached_menu = await self._cache_service.get_cache(
-            f'menu_id-{menu_id}'
-        )
+        cached_menu = await self._cache_service.get_cache(f'menu_id-{menu_id}')
         if cached_menu is None or not hasattr(cached_menu, 'submenus_count'):
-            menu = (
-                await self._menu_repository.get_menu_db_with_counts(menu_id)
-            )
+            menu = await self._menu_repository.get_menu_db_with_counts(menu_id)
             await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
             return menu
         return cached_menu
