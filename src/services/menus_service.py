@@ -23,7 +23,7 @@ class MenuService:
         """Service function for creation object menu and saving cache."""
         menu = await self._menu_repository.create_menu_db(schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        await self._cache_service.delete_cache('list_menus')
+        await self._cache_service.delete_caches(['list_menus'])
         return menu
 
     async def update_menu(
@@ -32,7 +32,7 @@ class MenuService:
         """Service function for update object menu and saving cache."""
         menu = await self._menu_repository.update_menu_db(menu_id, schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        await self._cache_service.delete_cache('list_menus')
+        await self._cache_service.delete_caches(['list_menus'])
         return menu
 
     async def get_menu(self, menu_id: UUID) -> MenuInfResponse:
@@ -47,7 +47,7 @@ class MenuService:
     async def delete_menu(self, menu_id: UUID) -> None:
         """Service function for delete object menu from DB and redis cache."""
         await self._cache_service.invalidate_cache_for_menu(menu_id)
-        await self._cache_service.delete_cache('list_menus')
+        await self._cache_service.delete_caches(['list_menus'])
         await self._menu_repository.delete_menu_db(menu_id)
 
     async def get_menus(self) -> list[MenuInfResponse]:

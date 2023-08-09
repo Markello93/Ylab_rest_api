@@ -45,9 +45,9 @@ class CacheService:
         return None
 
     @with_redis_connection
-    async def delete_cache(self, redis_conn, key: str) -> None:
-        """Delete cache for object."""
-        await redis_conn.delete(key)
+    async def delete_caches(self, redis_conn, keys: list) -> None:
+        """Delete multiple caches for given keys."""
+        await redis_conn.delete(*keys)
 
     @with_redis_connection
     async def invalidate_cache_for_menu(

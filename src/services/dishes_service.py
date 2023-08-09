@@ -28,9 +28,8 @@ class DishService:
             f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish.id}',
             dish,
         )
-        await self._cache_service.delete_cache(f'submenus_list_{menu_id}')
-        await self._cache_service.delete_cache(
-            f'dishes_list_{menu_id}_{submenu_id}'
+        await self._cache_service.delete_caches(
+            [f'submenus_list_{menu_id}', f'dishes_list_{menu_id}_{submenu_id}']
         )
         return dish
 
@@ -47,8 +46,8 @@ class DishService:
             f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish.id}',
             dish,
         )
-        await self._cache_service.delete_cache(
-            f'dishes_list_{menu_id}_{submenu_id}'
+        await self._cache_service.delete_caches(
+            [f'dishes_list_{menu_id}_{submenu_id}']
         )
         return dish
 
@@ -67,14 +66,14 @@ class DishService:
 
     async def delete_dish(self, menu_id, submenu_id, dish_id: UUID) -> None:
         """Service function for delete object dish from DB and redis cache."""
-        await self._cache_service.delete_cache(
-            f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}'
+        await self._cache_service.delete_caches(
+            [
+                f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}',
+                f'dishes_list_{menu_id}_{submenu_id}',
+            ]
         )
         await self._cache_service.invalidate_cache_for_submenu(
             menu_id, submenu_id
-        )
-        await self._cache_service.delete_cache(
-            f'dishes_list_{menu_id}_{submenu_id}'
         )
         await self._dish_repository.delete_dish_db(dish_id)
 
