@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.menu_response import MenuInfResponse
@@ -90,7 +91,13 @@ class MenuRepository(AbstractRepository):
 
         return await self.update(menu)
 
-    async def delete_menu_db(self, menu_id: UUID) -> None:
+    async def delete_menu_db(self, menu_id: UUID) -> JSONResponse:
         """Delete menu object from the database."""
         menu = await self.get_menu_db(menu_id)
         await self.delete(menu.id)
+        return JSONResponse(
+            status_code=200,
+            content={
+                'message': 'The menu was successfully removed from the database'
+            },
+        )

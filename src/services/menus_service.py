@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends
+from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import MenuRequest
 from src.api.response_models.menu_response import MenuInfResponse
@@ -44,11 +45,14 @@ class MenuService:
             return menu
         return cached_menu
 
-    async def delete_menu(self, menu_id: UUID) -> None:
+    async def delete_menu(self, menu_id: UUID) -> JSONResponse:
         """Service function for delete object menu from DB and redis cache."""
         await self._cache_service.invalidate_cache_for_menu(menu_id)
         await self._cache_service.delete_caches(['list_menus'])
-        await self._menu_repository.delete_menu_db(menu_id)
+        delete_menu_from_db = await self._menu_repository.delete_menu_db(
+            menu_id
+        )
+        return delete_menu_from_db
 
     async def get_menus(self) -> list[MenuInfResponse]:
         """Service function for get list of menus from DB or redis cache."""

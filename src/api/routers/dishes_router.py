@@ -94,8 +94,9 @@ class DishCBV:
         ),
         dish_id: UUID4 = Path(..., description='The ID of the dish to delete'),
     ) -> JSONResponse:
-        await self.__dish_service.delete_dish(menu_id, submenu_id, dish_id)
-        return JSONResponse(content={}, status_code=HTTPStatus.OK)
+        return await self.__dish_service.delete_dish(
+            menu_id, submenu_id, dish_id
+        )
 
     @dishes_router.get(
         '/',
