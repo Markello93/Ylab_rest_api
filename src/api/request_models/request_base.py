@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from decimal import Decimal
+
+from pydantic import BaseModel, Field
 
 
 class MenuRequest(BaseModel):
@@ -13,4 +15,4 @@ class DishRequest(BaseModel):
 
     title: str
     description: str
-    price: str
+    price: Decimal = Field(max_digits=10, decimal_places=2)

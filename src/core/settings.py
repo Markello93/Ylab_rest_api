@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     DB_PASS_TEST: str
     REDIS_HOST: str
     REDIS_PORT: int
-    REDIS_DB = 0
+    REDIS_DB = int
     REDIS_CACHE_LIFETIME: int
 
     @property
@@ -44,9 +44,7 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         """Get link for redis connection."""
-        return (
-            f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}'
-        )
+        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}'
 
     class Config:
         env_file = '.env'

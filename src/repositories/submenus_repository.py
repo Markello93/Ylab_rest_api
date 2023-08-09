@@ -50,7 +50,7 @@ class SubmenuRepository(AbstractRepository):
     async def get_submenu_with_count_db(
         self, submenu_id: UUID
     ) -> SubmenuInfoResponse:
-        """ Get submenu with count of dishes from database."""
+        """Get submenu with count of dishes from database."""
         stmt = (
             select(Submenu, func.count(Submenu.dishes).label('dishes_count'))
             .join(Submenu.dishes, isouter=True)

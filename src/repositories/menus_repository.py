@@ -18,13 +18,11 @@ class MenuRepository(AbstractRepository):
     def __init__(self, session: AsyncSession = Depends(get_session)):
         super().__init__(session, Menu)
 
-    async def get_menu_db(self, menu_id: UUID):
+    async def get_menu_db(self, menu_id: UUID) -> Menu:
         """Get menu by menu_id."""
         return await self.get_instance(menu_id)
 
-    async def get_menu_db_with_counts(
-        self, menu_id: UUID
-    ) -> MenuInfResponse:
+    async def get_menu_db_with_counts(self, menu_id: UUID) -> MenuInfResponse:
         """Get menu by menu_id with submenu and dish counts."""
         stmt = (
             select(

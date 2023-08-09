@@ -14,6 +14,7 @@ class SubmenuResponse(BaseModel):
 
 class SubmenuInfoResponse(SubmenuResponse):
     """Response model for submenu with count of dishes."""
+
     menu_id: UUID4
     dishes_count: int | None = 0
 

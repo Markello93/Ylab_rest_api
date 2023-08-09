@@ -30,7 +30,9 @@ class AbstractRepository(Generic[DatabaseModel], abc.ABC):
         Dish: 'dish not found',
     }
 
-    def __init__(self, session: AsyncSession, model: type[DatabaseModel]) -> None:
+    def __init__(
+        self, session: AsyncSession, model: type[DatabaseModel]
+    ) -> None:
         self._session = session
         self._model = model
 
@@ -45,21 +47,28 @@ class AbstractRepository(Generic[DatabaseModel], abc.ABC):
         except IntegrityError:
             await self._session.rollback()
             raise exceptions.ObjectAlreadyExistsError(
-                'Object with this title already exists.')
+                'Object with this title already exists.'
+            )
 
         return instance
 
     async def get_or_none(self, instance_id: UUID4) -> DatabaseModel | None:
         """Get object by ID. Return None if object not found."""
-        db_obj: DatabaseModel | None = await self._session.execute(
-            select(self._model).where(self._model.id == instance_id)
-        ).scalars().first()
+        db_obj: DatabaseModel | None = (
+            await self._session.execute(
+                select(self._model).where(self._model.id == instance_id)
+            )
+            .scalars()
+            .first()
+        )
         return db_obj
 
     async def get_instance(self, instance_id: UUID4) -> DatabaseModel:
         """Get object by ID. Raise error if object not found."""
         stmt = select(self._model).where(self._model.id == instance_id)
-        db_obj: DatabaseModel | None = (await self._session.execute(stmt)).scalars().first()
+        db_obj: DatabaseModel | None = (
+            (await self._session.execute(stmt)).scalars().first()
+        )
         if db_obj is None:
             error_message = self.ERROR_MESSAGES.get(
                 self._model, 'Object not found'

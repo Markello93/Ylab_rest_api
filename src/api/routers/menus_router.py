@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from fastapi.responses import JSONResponse
 from fastapi_restful.cbv import cbv
 from pydantic import UUID4
@@ -19,35 +19,71 @@ class MenuCBV:
     __menu_service: MenuService = Depends()
 
     @menu_router.post(
-        '/', response_model=MenuInfResponse, status_code=HTTPStatus.CREATED
+        '/',
+        summary='Create a new menu',
+        description='To create a menu, send a POST request with JSON data containing the "title" '
+        'and "description" fields in string format.',
+        response_model=MenuInfResponse,
+        status_code=HTTPStatus.CREATED,
+        response_description='The created menu',
     )
     async def create_menu_router(self, schema: MenuRequest) -> MenuInfResponse:
         return await self.__menu_service.create_menu(schema)
 
     @menu_router.get(
         '/{menu_id}',
+        summary='Get a menu by ID',
+        description='To retrieve a menu, send a GET request with the menu_id parameter in the URL.',
         response_model=MenuInfResponse,
         status_code=HTTPStatus.OK,
+        response_description='The requested menu',
     )
-    async def get_menu_router(self, menu_id: UUID4) -> MenuInfResponse:
+    async def get_menu_router(
+        self,
+        menu_id: UUID4 = Path(
+            ..., description='The ID of the menu to retrieve'
+        ),
+    ) -> MenuInfResponse:
         return await self.__menu_service.get_menu(menu_id)
 
     @menu_router.patch(
-        '/{menu_id}', response_model=MenuInfResponse, status_code=HTTPStatus.OK
+        '/{menu_id}',
+        summary='Update a menu by ID',
+        description='To update a menu, send a PATCH request with the menu_id parameter in the URL '
+        'and JSON data containing the "title" and "description" fields in string format in the request body.',
+        response_model=MenuInfResponse,
+        status_code=HTTPStatus.OK,
+        response_description='The menu with changes',
     )
-    async def update_menu_router(self, menu_id: UUID4,
-                                 schema: MenuRequest) -> MenuInfResponse:
+    async def update_menu_router(
+        self,
+        schema: MenuRequest,
+        menu_id: UUID4 = Path(..., description='The ID of the menu to update'),
+    ) -> MenuInfResponse:
         return await self.__menu_service.update_menu(menu_id, schema)
 
     @menu_router.delete(
-        '/{menu_id}', response_model=None, status_code=HTTPStatus.OK
+        '/{menu_id}',
+        summary='Delete a menu by ID',
+        description='To delete a menu, send a DELETE request with the menu_id parameter in the URL.',
+        response_model=None,
+        status_code=HTTPStatus.OK,
+        response_description='Returns an empty JSON with status code 200 if deletion was successful',
     )
-    async def delete_menu_router(self, menu_id: UUID4) -> JSONResponse:
+    async def delete_menu_router(
+        self,
+        menu_id: UUID4 = Path(..., description='The ID of the menu to delete'),
+    ) -> JSONResponse:
         await self.__menu_service.delete_menu(menu_id)
         return JSONResponse(content={}, status_code=HTTPStatus.OK)
 
     @menu_router.get(
-        '/', response_model=list[MenuInfResponse], status_code=HTTPStatus.OK
+        '/',
+        summary='Get a list of available menus',
+        description='To retrieve menus, send a GET request to the "menus" URL path.',
+        response_model=list[MenuInfResponse],
+        status_code=HTTPStatus.OK,
+        response_description='Returns a list of menus, or an empty list if no menus have been created',
     )
     async def get_menus_router(self) -> list[MenuInfResponse]:
         return await self.__menu_service.get_menus()
