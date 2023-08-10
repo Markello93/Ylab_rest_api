@@ -87,8 +87,7 @@ class SubmenuCBV:
             ..., description='The ID of the submenu to delete'
         ),
     ) -> JSONResponse:
-        await self.__submenu_service.delete_submenu(menu_id, submenu_id)
-        return JSONResponse(content={}, status_code=HTTPStatus.OK)
+        return await self.__submenu_service.delete_submenu(menu_id, submenu_id)
 
     @submenus_router.get(
         '/',

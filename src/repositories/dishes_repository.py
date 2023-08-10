@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import DishRequest
 from src.core import exceptions
@@ -65,7 +66,13 @@ class DishRepository(AbstractRepository):
         dish.price = schema.price
         return await self.update(dish)
 
-    async def delete_dish_db(self, dish_id: UUID) -> None:
+    async def delete_dish_db(self, dish_id: UUID) -> JSONResponse:
         """Delete dish object from the database."""
         dish = await self.get_dish_db(dish_id)
         await self.delete(dish.id)
+        return JSONResponse(
+            status_code=200,
+            content={
+                'message': 'The dish was successfully removed from the database'
+            },
+        )

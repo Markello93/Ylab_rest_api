@@ -74,8 +74,7 @@ class MenuCBV:
         self,
         menu_id: UUID4 = Path(..., description='The ID of the menu to delete'),
     ) -> JSONResponse:
-        await self.__menu_service.delete_menu(menu_id)
-        return JSONResponse(content={}, status_code=HTTPStatus.OK)
+        return await self.__menu_service.delete_menu(menu_id)
 
     @menu_router.get(
         '/',
