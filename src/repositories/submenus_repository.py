@@ -16,7 +16,7 @@ from src.repositories.abstract_repository import AbstractRepository
 class SubmenuRepository(AbstractRepository):
     """Repository associated with model Submenu."""
 
-    def __init__(self, session: AsyncSession = Depends(get_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)) -> None:
         super().__init__(session, Submenu)
 
     async def get_list_of_submenus_db(

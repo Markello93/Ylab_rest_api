@@ -15,7 +15,7 @@ from src.repositories.abstract_repository import AbstractRepository
 class DishRepository(AbstractRepository):
     """Repository associated with model Dish."""
 
-    def __init__(self, session: AsyncSession = Depends(get_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)) -> None:
         super().__init__(session, Dish)
 
     async def get_dish_db(self, dish_id: UUID) -> Dish:
