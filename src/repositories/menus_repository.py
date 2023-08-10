@@ -16,7 +16,7 @@ from src.repositories.abstract_repository import AbstractRepository
 class MenuRepository(AbstractRepository):
     """Repository associated with model Menu."""
 
-    def __init__(self, session: AsyncSession = Depends(get_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)) -> None:
         super().__init__(session, Menu)
 
     async def get_menu_db(self, menu_id: UUID) -> Menu:
