@@ -12,14 +12,19 @@ from src.api.response_models.submenu_response import SubmenuInfoResponse
 from src.core.settings import settings
 
 CacheResponseType = Union[
-    DishResponse, MenuInfResponse, SubmenuInfoResponse,
-    list[DishResponse], list[MenuInfResponse], list[SubmenuInfoResponse], None
+    DishResponse,
+    MenuInfResponse,
+    SubmenuInfoResponse,
+    list[DishResponse],
+    list[MenuInfResponse],
+    list[SubmenuInfoResponse],
+    None,
 ]
 
 
 def with_redis_connection(func):
     @functools.wraps(func)
-    async def wrapper(self, *args, **kwargs):
+    async def wrapper(self, *args, **kwargs) -> CacheResponseType:
         redis_conn = await self.get_redis_connection()
         try:
             return await func(self, redis_conn, *args, **kwargs)
@@ -30,7 +35,7 @@ def with_redis_connection(func):
 
 
 class CacheService:
-    def __init__(self):
+    def __init__(self) -> None:
         self.redis_url: str = settings.redis_url
         self.lifetime: int = settings.REDIS_CACHE_LIFETIME
 
@@ -41,14 +46,16 @@ class CacheService:
 
     @with_redis_connection
     async def set_cache(
-            self, redis_conn: aioredis.Redis, key: str, value: bytes
+        self, redis_conn: aioredis.Redis, key: str, value: bytes
     ) -> None:
         """Set cache for object in redis DB."""
         value = pickle.dumps(value)
         await redis_conn.set(key, value, ex=self.lifetime)
 
     @with_redis_connection
-    async def get_cache(self, redis_conn: aioredis.Redis, key: str) -> CacheResponseType:
+    async def get_cache(
+        self, redis_conn: aioredis.Redis, key: str
+    ) -> CacheResponseType:
         """Get cache for object in redis DB."""
         cache = await redis_conn.get(key)
         if cache:
@@ -57,14 +64,14 @@ class CacheService:
 
     @with_redis_connection
     async def delete_caches(
-            self, redis_conn: aioredis.Redis, keys: list
+        self, redis_conn: aioredis.Redis, keys: list
     ) -> None:
         """Delete multiple caches for given keys."""
         await redis_conn.delete(*keys)
 
     @with_redis_connection
     async def invalidate_cache_for_menu(
-            self, redis_conn: aioredis.Redis, menu_id: UUID4
+        self, redis_conn: aioredis.Redis, menu_id: UUID4
     ) -> None:
         """Delete cache for menu and all related submenus and dishes."""
         keys = await redis_conn.keys(f'menu_id-{menu_id}*')
@@ -73,7 +80,7 @@ class CacheService:
 
     @with_redis_connection
     async def invalidate_cache_for_submenu(
-            self, redis_conn: aioredis.Redis, menu_id: UUID4, submenu_id: UUID4
+        self, redis_conn: aioredis.Redis, menu_id: UUID4, submenu_id: UUID4
     ) -> None:
         """Delete cache for submenu and all related dishes."""
         keys = await redis_conn.keys(

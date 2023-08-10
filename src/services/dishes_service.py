@@ -57,7 +57,7 @@ class DishService:
     ) -> DishResponse:
         """Service function for get object dish from DB or redis cache."""
         cached_dish = await self._cache_service.get_cache(
-            f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}'
+            f'menu_id-{str(menu_id)}:submenu_id-{str(submenu_id)}:dish_id-{str(dish_id)}'
         )
         if cached_dish is None:
             dish = await self._dish_repository.get_dish_db(dish_id)
