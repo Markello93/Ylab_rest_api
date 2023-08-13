@@ -6,7 +6,7 @@ from fastapi_restful.cbv import cbv
 from pydantic import UUID4
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.menu_response import MenuInfResponse
+from src.api.response_models.menu_response import MenuInfResponse, MenuSummaryResponse
 from src.services.menus_service import MenuService
 
 menu_router = APIRouter(prefix='/menus', tags=['Menu'])
@@ -86,3 +86,15 @@ class MenuCBV:
     )
     async def get_menus_router(self) -> list[MenuInfResponse]:
         return await self.__menu_service.get_menus()
+
+    @menu_router.get(
+        '/menus_info/',
+        summary='Get full info about menus including dishes,submenus',
+        description='To get full info send a GET request, '
+                    'the response comes according to the changes in the administrators excel file',
+        response_model=list[MenuSummaryResponse],
+        status_code=HTTPStatus.OK,
+        response_description='Summary_menus_info',
+    )
+    async def get_all_info_router(self) -> list[MenuSummaryResponse]:
+        return await self.__menu_service.full_menus()

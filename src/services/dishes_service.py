@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import DishRequest
@@ -14,9 +14,11 @@ class DishService:
 
     def __init__(
         self,
+        background_tasks: BackgroundTasks,
         dish_repository: DishRepository = Depends(),
-        cache_service: CacheService = Depends(),
+        cache_service: CacheService = Depends()
     ) -> None:
+        self.__background_tasks = background_tasks
         self._dish_repository = dish_repository
         self._cache_service = cache_service
 
@@ -29,9 +31,9 @@ class DishService:
             f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish.id}',
             dish,
         )
-        await self._cache_service.delete_caches(
+        self.__background_tasks.add_task(await self._cache_service.delete_caches(
             [f'submenus_list_{menu_id}', f'dishes_list_{menu_id}_{submenu_id}']
-        )
+        ))
         return dish
 
     async def update_dish(
@@ -47,9 +49,9 @@ class DishService:
             f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish.id}',
             dish,
         )
-        await self._cache_service.delete_caches(
+        self.__background_tasks.add_task(await self._cache_service.delete_caches(
             [f'dishes_list_{menu_id}_{submenu_id}']
-        )
+        ))
         return dish
 
     async def get_dish(
@@ -59,25 +61,25 @@ class DishService:
         cached_dish = await self._cache_service.get_cache(
             f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}'
         )
-        if cached_dish is None:
-            dish = await self._dish_repository.get_dish_db(dish_id)
-            await self._cache_service.set_cache(dish_id, dish)
-            return dish
-        return cached_dish
+        if cached_dish:
+            return cached_dish
+        dish = await self._dish_repository.get_dish_db(dish_id)
+        await self._cache_service.set_cache(dish_id, dish)
+        return dish
 
     async def delete_dish(
         self, menu_id: UUID, submenu_id: UUID, dish_id: UUID
     ) -> JSONResponse:
         """Service function for delete object dish from DB and redis cache."""
-        await self._cache_service.delete_caches(
+        self.__background_tasks.add_task(await self._cache_service.delete_caches(
             [
                 f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}',
                 f'dishes_list_{menu_id}_{submenu_id}',
             ]
-        )
-        await self._cache_service.invalidate_cache_for_submenu(
+        ))
+        self.__background_tasks.add_task(await self._cache_service.invalidate_cache_for_submenu(
             menu_id, submenu_id
-        )
+        ))
         delete_dish_from_db = await self._dish_repository.delete_dish_db(
             dish_id
         )
@@ -90,12 +92,12 @@ class DishService:
         cache_key = f'dishes_list_{menu_id}_{submenu_id}'
         cached_dishes = await self._cache_service.get_cache(cache_key)
 
-        if cached_dishes is None:
-            dishes_response = (
-                await self._dish_repository.get_list_of_dishes_db(
-                    menu_id, submenu_id
-                )
+        if cached_dishes:
+            return cached_dishes
+        dishes_response = (
+            await self._dish_repository.get_list_of_dishes_db(
+                menu_id, submenu_id
             )
-            await self._cache_service.set_cache(cache_key, dishes_response)
-            return dishes_response
-        return cached_dishes
+        )
+        await self._cache_service.set_cache(cache_key, dishes_response)
+        return dishes_response

@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DB = int
     REDIS_CACHE_LIFETIME: int
+    RABBMQUSER: str
+    RABBMQHOST: str
 
     @property
     def database_url(self) -> str:
@@ -48,6 +50,11 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = '.env'
+
+    @property
+    def rabbit_url(self) -> str:
+        """Get link for connection to RabbitMQ borker."""
+        return f'pyamqp://{self.RABBMQUSER}@{self.RABBMQHOST}//'
 
 
 @cache
