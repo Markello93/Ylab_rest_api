@@ -22,8 +22,9 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DB = int
     REDIS_CACHE_LIFETIME: int
-    RABBMQUSER: str
+    RABBITMQ_DEFAULT_USER: str
     RABBMQHOST: str
+    RABBITMQ_DEFAULT_PASS: str
 
     @property
     def database_url(self) -> str:
@@ -54,7 +55,7 @@ class Settings(BaseSettings):
     @property
     def rabbit_url(self) -> str:
         """Get link for connection to RabbitMQ borker."""
-        return f'pyamqp://{self.RABBMQUSER}@{self.RABBMQHOST}//'
+        return f'amqp://{self.RABBITMQ_DEFAULT_USER}:{self.RABBITMQ_DEFAULT_PASS}@{self.RABBMQHOST}:5672'
 
 
 @cache

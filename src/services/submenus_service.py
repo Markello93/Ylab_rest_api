@@ -16,7 +16,7 @@ class SubmenuService:
         self,
         background_tasks: BackgroundTasks,
         submenus_repository: SubmenuRepository = Depends(),
-        cache_service: CacheService = Depends()
+        cache_service: CacheService = Depends(),
     ) -> None:
         self._submenus_repository = submenus_repository
         self._cache_service = cache_service
@@ -32,7 +32,9 @@ class SubmenuService:
         await self._cache_service.set_cache(
             f'menu_id-{menu_id}:submenu_id-{submenu.id}', submenu
         )
-        self.__background_tasks.add_task(await self._cache_service.delete_caches([f'submenus_list_{menu_id}']))
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, [f'submenus_list_{menu_id}']
+        )
         return submenu
 
     async def update_submenu(
@@ -45,9 +47,10 @@ class SubmenuService:
         await self._cache_service.set_cache(
             f'menu_id-{submenu.menu_id}:submenu_id-{submenu.id}', submenu
         )
-        self.__background_tasks.add_task(await self._cache_service.delete_caches(
-            [f'submenus_list_{submenu.menu_id}']
-        ))
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches,
+            [f'submenus_list_{submenu.menu_id}'],
+        )
         return submenu
 
     async def get_submenu(
@@ -75,8 +78,14 @@ class SubmenuService:
         self, menu_id: UUID, submenu_id: UUID
     ) -> JSONResponse:
         """Service function for delete object submenu from DB and redis cache."""
-        self.__background_tasks.add_task(await self._cache_service.invalidate_cache_for_menu(menu_id))
-        self.__background_tasks.add_task(await self._cache_service.delete_caches([f'submenus_list_{menu_id}']))
+        self.__background_tasks.add_task(
+            self._cache_service.invalidate_cache_for_menu, menu_id
+        )
+        self.__background_tasks.add_task(
+            self._cache_service.invalidate_cache_for_submenu,
+            menu_id,
+            submenu_id,
+        )
         delete_submenu_from_db = (
             await self._submenus_repository.delete_submenu_db(submenu_id)
         )
@@ -90,9 +99,7 @@ class SubmenuService:
         if cached_submenus:
             return cached_submenus
         submenus_response = (
-            await self._submenus_repository.get_list_of_submenus_db(
-                menu_id
-            )
+            await self._submenus_repository.get_list_of_submenus_db(menu_id)
         )
         await self._cache_service.set_cache(cache_key, submenus_response)
         return submenus_response

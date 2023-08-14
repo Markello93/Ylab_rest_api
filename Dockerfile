@@ -39,5 +39,3 @@ ADD . /app
 
 
 EXPOSE 8000/tcp
-
-ENTRYPOINT /app/entrypoint.sh

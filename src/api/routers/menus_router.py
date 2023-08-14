@@ -91,7 +91,7 @@ class MenuCBV:
         '/menus_info/',
         summary='Get full info about menus including dishes,submenus',
         description='To get full info send a GET request, '
-                    'the response comes according to the changes in the administrators excel file',
+        'the response comes according to the changes in the administrators excel file',
         response_model=list[MenuSummaryResponse],
         status_code=HTTPStatus.OK,
         response_description='Summary_menus_info',

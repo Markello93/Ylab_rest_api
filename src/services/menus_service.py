@@ -16,7 +16,7 @@ class MenuService:
         self,
         background_tasks: BackgroundTasks,
         menu_repository: MenuRepository = Depends(),
-        cache_service: CacheService = Depends()
+        cache_service: CacheService = Depends(),
     ) -> None:
         self.__background_tasks = background_tasks
         self._menu_repository = menu_repository
@@ -26,15 +26,20 @@ class MenuService:
         """Service function for creation object menu and saving cache."""
         menu = await self._menu_repository.create_menu_db(schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        self.__background_tasks.add_task(await self._cache_service.delete_caches(['list_menus']))
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         return menu
 
     async def update_menu(
-            self, menu_id: UUID, schema: MenuRequest) -> MenuInfResponse:
+        self, menu_id: UUID, schema: MenuRequest
+    ) -> MenuInfResponse:
         """Service function for update object menu and saving cache."""
         menu = await self._menu_repository.update_menu_db(menu_id, schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        self.__background_tasks.add_task(await self._cache_service.delete_caches(['list_menus']))
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         return menu
 
     async def get_menu(self, menu_id: UUID) -> MenuInfResponse:
@@ -48,8 +53,12 @@ class MenuService:
 
     async def delete_menu(self, menu_id: UUID) -> JSONResponse:
         """Service function for delete object menu from DB and redis cache."""
-        self.__background_tasks.add_task(await self._cache_service.invalidate_cache_for_menu(menu_id))
-        self.__background_tasks.add_task(await self._cache_service.delete_caches(['list_menus']))
+        self.__background_tasks.add_task(
+            self._cache_service.invalidate_cache_for_menu, menu_id
+        )
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         delete_menu_from_db = await self._menu_repository.delete_menu_db(
             menu_id
         )
