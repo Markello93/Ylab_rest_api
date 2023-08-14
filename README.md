@@ -21,7 +21,8 @@
 Такая архитектура выбрана для упрощенного масштабирования проекта в будущем.
 Все доступные CRUD операции прописаны в документации по пути /docs:
 
-
+### Добавленный эндпоинт  в  ДЗ 4 для вывода всех объектов в базе:
+* {{LOCAL_URL}}/api/v1/menus/menus_info/
 ## Инструкция по запуску проекта
 ```bash
 git clone https://github.com/Markello93/Ylab_rest_api.git
@@ -55,8 +56,18 @@ RABBITMQ_DEFAULT_USER=guest              # пользователь RabbitMQ
 RABBMQHOST=rabbitmq                      # хост RabbitMQ
 RABBITMQ_DEFAULT_PASS=guest              # пароль пользователя RabbitMQ
 ```
-
-#### Запустите сборку контейнеров docker командой:
+#### Запуск сборку контейнеров для тестирования в postman:
+Для тестирования функционала дб в postman необходимо сначала собрать контейнер без включенных celery и celery_beat
+Предлагается это делать командой:
+```
+docker-compose up -d resto_back postgres redis rabbitmq
+```
+Таким образом мы поднимем все контейнеры кроме celery и celery_beat, можем пройти тесты в postman
+и затем подключить недостающие контейнеры для обновления дб из базы данных командой:
+```
+docker-compose up -d --no-deps celery celery_beat
+```
+#### Запуск сборки контейнеров с подключенной фоновой задачей docker командой:
 ```
 docker-compose up -d
 ```
@@ -65,11 +76,10 @@ docker-compose up -d
 Так же в Dockerfile прописана инструкция для автоматической установки зависимостей через менеджер poetry.
 
 #### Для автоматического запуска тестов в отдельном контейнере используется команда:
-Команда поднимает контейнер, выполняет тесты, после чего удаляет контейнеры и тома:
 ```
 docker-compose -f docker-compose_tests.yml up --abort-on-container-exit && docker-compose -f docker-compose_tests.yml  down -v
 ```
-
+Команда поднимает контейнер, выполняет тесты, после чего удаляет контейнеры и тома.
 Выполнены доп. задания:
 ДЗ 2:
 * Реализовать вывод количества подменю и блюд для Меню через один (сложный) ORM запрос : (метод get_menu_db_with_counts в menus_repository,метод get_submenu_with_count_db в submenus_repository)
