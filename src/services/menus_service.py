@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.menu_response import MenuInfResponse
+from src.api.response_models.menu_response import MenuInfResponse, MenuSummaryResponse
 from src.repositories.menus_repository import MenuRepository
 from src.services.cache_service import CacheService
 
@@ -14,9 +14,11 @@ class MenuService:
 
     def __init__(
         self,
+        background_tasks: BackgroundTasks,
         menu_repository: MenuRepository = Depends(),
         cache_service: CacheService = Depends(),
     ) -> None:
+        self.__background_tasks = background_tasks
         self._menu_repository = menu_repository
         self._cache_service = cache_service
 
@@ -24,7 +26,9 @@ class MenuService:
         """Service function for creation object menu and saving cache."""
         menu = await self._menu_repository.create_menu_db(schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        await self._cache_service.delete_caches(['list_menus'])
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         return menu
 
     async def update_menu(
@@ -33,7 +37,9 @@ class MenuService:
         """Service function for update object menu and saving cache."""
         menu = await self._menu_repository.update_menu_db(menu_id, schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
-        await self._cache_service.delete_caches(['list_menus'])
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         return menu
 
     async def get_menu(self, menu_id: UUID) -> MenuInfResponse:
@@ -47,8 +53,12 @@ class MenuService:
 
     async def delete_menu(self, menu_id: UUID) -> JSONResponse:
         """Service function for delete object menu from DB and redis cache."""
-        await self._cache_service.invalidate_cache_for_menu(menu_id)
-        await self._cache_service.delete_caches(['list_menus'])
+        self.__background_tasks.add_task(
+            self._cache_service.invalidate_cache_for_menu, menu_id
+        )
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches, ['list_menus']
+        )
         delete_menu_from_db = await self._menu_repository.delete_menu_db(
             menu_id
         )
@@ -58,8 +68,11 @@ class MenuService:
         """Service function for get list of menus from DB or redis cache."""
         cached_menus = await self._cache_service.get_cache('list_menus')
 
-        if cached_menus is None:
-            menus_response = await self._menu_repository.get_list_of_menus_db()
-            await self._cache_service.set_cache('list_menus', menus_response)
-            return menus_response
-        return cached_menus
+        if cached_menus:
+            return cached_menus
+        menus_response = await self._menu_repository.get_list_of_menus_db()
+        await self._cache_service.set_cache('list_menus', menus_response)
+        return menus_response
+
+    async def full_menus(self) -> list[MenuSummaryResponse]:
+        return await self._menu_repository.get_full_menus_info_db()

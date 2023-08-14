@@ -3,10 +3,11 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from starlette.responses import JSONResponse
 
 from src.api.request_models.request_base import MenuRequest
-from src.api.response_models.menu_response import MenuInfResponse
+from src.api.response_models.menu_response import MenuInfResponse, MenuSummaryResponse
 from src.core import exceptions
 from src.db.db import get_session
 from src.db.models import Dish, Menu, Submenu
@@ -101,3 +102,10 @@ class MenuRepository(AbstractRepository):
                 'message': 'The menu was successfully removed from the database'
             },
         )
+
+    async def get_full_menus_info_db(self) -> list[MenuSummaryResponse]:
+        stmt = select(Menu).options(
+            selectinload(Menu.submenus).selectinload(Submenu.dishes))
+        result = await self._session.execute(stmt)
+        menus = result.scalars().all()
+        return menus

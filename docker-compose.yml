@@ -11,8 +11,6 @@ services:
       - 5432:5432
     env_file:
       - .env
-    networks:
-      - my_network
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d","postgres-rest" ]
       interval: 10s
@@ -24,8 +22,6 @@ services:
     image: redis:latest
     container_name: redis
     restart: always
-    networks:
-      - my_network
     volumes:
       - redis_data:/data
     expose:
@@ -40,6 +36,21 @@ services:
       timeout: 3s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:alpine
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/data
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
 
   resto_back:
     build:
@@ -51,6 +62,8 @@ services:
          condition: service_healthy
        redis:
          condition: service_healthy
+       rabbitmq:
+         condition: service_healthy
     env_file:
       - .env
     volumes:
@@ -59,13 +72,26 @@ services:
     tty: true
     ports:
       - "8000:8000"
-    networks:
-      - my_network
+    entrypoint: /app/entrypoint.sh
 
-networks:
-  my_network:
-    driver: bridge
+  celery:
+    build: .
+    command: celery -A src.celery_settings.celery_config worker -l info --pool=solo
+    depends_on:
+      - resto_back
+      - rabbitmq
+  celery_beat:
+    build: .
+    volumes:
+      - celery_beat:/data
+    command: celery -A src.celery_settings.celery_config beat
+    depends_on:
+      - resto_back
+      - rabbitmq
+
 
 volumes:
   postgres_data:
   redis_data:
+  celery_beat:
+  rabbitmq_data:

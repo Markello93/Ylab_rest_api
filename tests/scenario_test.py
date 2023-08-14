@@ -6,7 +6,9 @@ from httpx import AsyncClient
 @pytest.mark.parametrize(
     'menu_data', [{}], indirect=True, ids=['create_scenario_menu']
 )
-async def test_menu(ac: AsyncClient, menu_data, test_ids: dict[str, str]) -> None:
+async def test_menu(
+    ac: AsyncClient, menu_data, test_ids: dict[str, str]
+) -> None:
     response = await ac.post('/api/v1/menus/', json=menu_data)
     assert (
         response.status_code == 201
@@ -25,7 +27,9 @@ async def test_menu(ac: AsyncClient, menu_data, test_ids: dict[str, str]) -> Non
 @pytest.mark.parametrize(
     'menu_data', [{}], indirect=True, ids=['create_scenario_submenu']
 )
-async def test_submenu(ac: AsyncClient, menu_data, test_ids: dict[str, str]) -> None:
+async def test_submenu(
+    ac: AsyncClient, menu_data, test_ids: dict[str, str]
+) -> None:
     response = await ac.post(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/", json=menu_data
     )
@@ -50,7 +54,9 @@ async def test_submenu(ac: AsyncClient, menu_data, test_ids: dict[str, str]) -> 
 @pytest.mark.parametrize(
     'dish_data', [{}], indirect=True, ids=['create_dish_one']
 )
-async def test_dish1(ac: AsyncClient, dish_data, test_ids: dict[str, str]) -> None:
+async def test_dish1(
+    ac: AsyncClient, dish_data, test_ids: dict[str, str]
+) -> None:
     response = await ac.post(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}/dishes/",
         json=dish_data,
@@ -77,7 +83,9 @@ async def test_dish1(ac: AsyncClient, dish_data, test_ids: dict[str, str]) -> No
 @pytest.mark.parametrize(
     'dish_data', [{}], indirect=True, ids=['create_dish_two']
 )
-async def test_dish2(ac: AsyncClient, dish_data, test_ids: dict[str, str]) -> None:
+async def test_dish2(
+    ac: AsyncClient, dish_data, test_ids: dict[str, str]
+) -> None:
     response = await ac.post(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}/dishes/",
         json=dish_data,
@@ -101,7 +109,9 @@ async def test_dish2(ac: AsyncClient, dish_data, test_ids: dict[str, str]) -> No
 
 
 @pytest.mark.run(order=26)
-async def test_get_scenario_menu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_get_scenario_menu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 200
@@ -120,7 +130,9 @@ async def test_get_scenario_menu(ac: AsyncClient, test_ids: dict[str, str]) -> N
 
 
 @pytest.mark.run(order=27)
-async def test_get_scenario_submenu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_get_scenario_submenu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
     )
@@ -139,7 +151,9 @@ async def test_get_scenario_submenu(ac: AsyncClient, test_ids: dict[str, str]) -
 
 
 @pytest.mark.run(order=28)
-async def test_del_scenario_submenu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_del_scenario_submenu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.delete(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}"
     )
@@ -149,7 +163,9 @@ async def test_del_scenario_submenu(ac: AsyncClient, test_ids: dict[str, str]) -
 
 
 @pytest.mark.run(order=29)
-async def test_get_scenario_submenu_list(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_get_scenario_submenu_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}/submenus/")
     assert (
         response.status_code == 200
@@ -159,7 +175,9 @@ async def test_get_scenario_submenu_list(ac: AsyncClient, test_ids: dict[str, st
 
 
 @pytest.mark.run(order=30)
-async def test_get_scenario_empty_dishes_list(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_get_scenario_empty_dishes_list(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(
         f"/api/v1/menus/{test_ids['menu_id']}/submenus/{test_ids['submenu_id']}/dishes/"
     )
@@ -171,7 +189,9 @@ async def test_get_scenario_empty_dishes_list(ac: AsyncClient, test_ids: dict[st
 
 
 @pytest.mark.run(order=31)
-async def test_get_scenario_empty_menu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_get_scenario_empty_menu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.get(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 200
@@ -189,7 +209,9 @@ async def test_get_scenario_empty_menu(ac: AsyncClient, test_ids: dict[str, str]
 
 
 @pytest.mark.run(order=32)
-async def test_del_scenario_menu(ac: AsyncClient, test_ids: dict[str, str]) -> None:
+async def test_del_scenario_menu(
+    ac: AsyncClient, test_ids: dict[str, str]
+) -> None:
     response = await ac.delete(f"/api/v1/menus/{test_ids['menu_id']}")
     assert (
         response.status_code == 200

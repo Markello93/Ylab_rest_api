@@ -23,6 +23,8 @@ pytest-ordering = "^0.6"
 redis = "^4.6.0"
 pre-commit = "^3.3.3"
 types-redis = "^4.6.0.3"
+openpyxl = "^3.1.2"
+celery = "^5.3.1"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"

@@ -1,13 +1,11 @@
 import uuid
 from decimal import Decimal
-from typing import List, Optional
 
-from sqlalchemy import Numeric, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID, TEXT
-from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import sqlalchemy as sa
+from sqlalchemy import Numeric, UniqueConstraint
+from sqlalchemy.dialects.postgresql import TEXT, UUID
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -20,61 +18,61 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(id={self.id})"
+        return f'{self.__class__.__name__}(id={self.id})'
 
 
 class Menu(Base):
     """Model for creating Menu object in the database."""
 
-    __tablename__ = "menus"
+    __tablename__ = 'menus'
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(TEXT, nullable=False)
-    submenus: Mapped[List["Submenu"]] = relationship(
-        "Submenu",
-        back_populates="menu",
-        cascade="all, delete-orphan",
-        lazy="selectin",
+    submenus: Mapped[list['Submenu']] = relationship(
+        'Submenu',
+        back_populates='menu',
+        cascade='all, delete-orphan',
+        lazy='selectin',
     )
 
 
 class Submenu(Base):
     """Model for creating Submenu object in the database."""
 
-    __tablename__ = "submenus"
+    __tablename__ = 'submenus'
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(TEXT, nullable=False)
-    menu_id: Mapped[Optional[UUID]] = mapped_column(
-        sa.ForeignKey("menus.id"), nullable=False
+    menu_id: Mapped[UUID | None] = mapped_column(
+        sa.ForeignKey('menus.id'), nullable=False
     )
-    menu: Mapped["Menu"] = relationship(
-        "Menu", back_populates="submenus", lazy="selectin"
-    )
-
-    dishes: Mapped[List["Dish"]] = relationship(
-        "Dish",
-        back_populates="submenu",
-        cascade="all, delete-orphan",
-        lazy="selectin",
+    menu: Mapped['Menu'] = relationship(
+        'Menu', back_populates='submenus', lazy='selectin'
     )
 
-    __table_args__ = (UniqueConstraint("title", "menu_id"),)
+    dishes: Mapped[list['Dish']] = relationship(
+        'Dish',
+        back_populates='submenu',
+        cascade='all, delete-orphan',
+        lazy='selectin',
+    )
+
+    __table_args__ = (UniqueConstraint('title', 'menu_id'),)
 
 
 class Dish(Base):
     """Model for creating Dish object in the database."""
 
-    __tablename__ = "dishes"
+    __tablename__ = 'dishes'
 
     title: Mapped[str] = mapped_column(TEXT, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(TEXT, nullable=False)
-    price: Mapped[Optional[Decimal]] = mapped_column(
-        Numeric(precision=5, scale=2), nullable=False
+    price: Mapped[Decimal | None] = mapped_column(
+        Numeric(precision=7, scale=2), nullable=False
     )
-    submenu_id: Mapped[Optional[UUID]] = mapped_column(
-        sa.ForeignKey("submenus.id"), nullable=False
+    submenu_id: Mapped[UUID | None] = mapped_column(
+        sa.ForeignKey('submenus.id'), nullable=False
     )
-    submenu: Mapped["Submenu"] = relationship(
-        "Submenu", back_populates="dishes", lazy="selectin"
+    submenu: Mapped['Submenu'] = relationship(
+        'Submenu', back_populates='dishes', lazy='selectin'
     )
