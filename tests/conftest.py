@@ -7,14 +7,13 @@ from typing import AsyncGenerator, Generator
 import pytest
 from faker import Faker
 from httpx import AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from run import app
 from src.core.settings import Settings, get_settings, settings
 from src.db.db import get_session
-from src.db.models import Base, Dish, Menu, Submenu
+from src.db.models import Base
 
 sys.path.append(os.path.join(os.getcwd(), 'src'))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -43,6 +42,14 @@ async def prepare_database() -> AsyncGenerator:
         await conn.run_sync(Base.metadata.drop_all)
 
 
+@pytest.fixture
+async def clear_db():
+    async with engine_test.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    async with engine_test.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
 @pytest.fixture(scope='session')
 def event_loop(request) -> Generator[AbstractEventLoop, None, None]:
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -63,76 +70,6 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
 
-@pytest.fixture(scope='function')
-async def last_menu_data() -> dict:
-    """Getting last menu from DB."""
-    async with async_session_maker() as session:
-        last_menu_id_result = await session.execute(
-            select(Menu.id).order_by(Menu.id.desc()).limit(1)
-        )
-        last_menu_id = str(last_menu_id_result.scalar())
-        last_menu_data_result = await session.execute(
-            select(Menu.description, Menu.title).filter(
-                Menu.id == last_menu_id
-            )
-        )
-        description, title = last_menu_data_result.one()
-
-        return {'id': last_menu_id, 'description': description, 'title': title}
-
-
-@pytest.fixture(scope='function')
-async def last_submenu_data() -> dict:
-    """Getting last submenu from DB"""
-    async with async_session_maker() as session:
-        last_submenu_id_result = await session.execute(
-            select(Submenu.id).order_by(Submenu.id.desc()).limit(1)
-        )
-        last_submenu_id = str(last_submenu_id_result.scalar())
-        last_submenu_data_result = await session.execute(
-            select(Submenu.description, Submenu.title).filter(
-                Submenu.id == last_submenu_id
-            )
-        )
-        description, title = last_submenu_data_result.one()
-
-        return {
-            'id': last_submenu_id,
-            'description': description,
-            'title': title,
-        }
-
-
-@pytest.fixture(scope='function')
-async def last_dish_data() -> dict:
-    """Getting last dish from DB."""
-    async with async_session_maker() as session:
-        last_dish_id_result = await session.execute(
-            select(Dish.id).order_by(Dish.id.desc()).limit(1)
-        )
-        last_dish_id = str(last_dish_id_result.scalar())
-
-        last_dish_data_result = await session.execute(
-            select(Dish.title, Dish.description, Dish.price).filter(
-                Dish.id == last_dish_id
-            )
-        )
-        title, description, price = last_dish_data_result.one()
-
-    return {
-        'id': last_dish_id,
-        'title': title,
-        'description': description,
-        'price': str(price),
-    }
-
-
-@pytest.fixture(scope='session')
-async def test_ids() -> dict:
-    """Fixture for saving ids during tests"""
-    return {}
-
-
 @pytest.fixture
 def menu_data() -> dict:
     """Fixture for fake menus and submenus."""
@@ -141,7 +78,7 @@ def menu_data() -> dict:
 
 @pytest.fixture
 def dish_data() -> dict:
-    """Fixture for fake menus and submenus."""
+    """Fixture for fake dishes."""
     return {
         'title': fake.sentence(),
         'description': fake.sentence(),
@@ -149,3 +86,58 @@ def dish_data() -> dict:
             fake.pydecimal(left_digits=3, right_digits=2, positive=True)
         ),
     }
+
+
+@pytest.fixture(scope='class')
+async def created_menu(ac: AsyncClient) -> dict:
+    menu_data = {'title': fake.sentence(), 'description': fake.sentence()}
+    response = await ac.post('/api/v1/menus/', json=menu_data)
+    return response.json()
+
+
+@pytest.fixture(scope='class')
+async def created_submenu(ac: AsyncClient) -> dict:
+    menu_data = {'title': fake.sentence(), 'description': fake.sentence()}
+    response = await ac.post('/api/v1/menus/', json=menu_data)
+    respone_json = response.json()
+    submenu_data = {'title': fake.sentence(), 'description': fake.sentence()}
+    response = await ac.post(
+        f"/api/v1/menus/{respone_json['id']}/submenus/", json=submenu_data
+    )
+    return response.json()
+
+
+@pytest.fixture(scope='class')
+async def created_dish(
+    ac: AsyncClient, created_menu: dict, created_submenu: dict
+) -> dict:
+    dish_data = {
+        'title': fake.sentence(),
+        'description': fake.sentence(),
+        'price': str(
+            fake.pydecimal(left_digits=3, right_digits=2, positive=True)
+        ),
+    }
+    response = await ac.post(
+        f"/api/v1/menus/{created_menu['id']}/submenus/{created_submenu['id']}/dishes/",
+        json=dish_data,
+    )
+    return response.json()
+
+
+@pytest.fixture(scope='session')
+async def submenu_created_info() -> dict:
+    """Fixture for saving ids during tests"""
+    return {}
+
+
+@pytest.fixture(scope='session')
+async def dish_created_info() -> dict:
+    """Fixture for saving ids during tests"""
+    return {}
+
+
+@pytest.fixture(scope='session')
+async def menu_created_info() -> dict:
+    """Fixture for saving ids during tests"""
+    return {}
