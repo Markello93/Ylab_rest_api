@@ -3,7 +3,7 @@
 ## Краткое описание задачи
 
 
-Реализовать REST API по работе с меню ресторана, все CRUD операции.
+REST API по работе с меню ресторана со всеми CRUD операциями.
 Зависимости:
 
 ●У меню есть подменю, которые к ней привязаны.
@@ -19,7 +19,11 @@
    в БД.
 
 Такая архитектура выбрана для упрощенного масштабирования проекта в будущем.
-Все доступные CRUD операции прописаны в документации по пути /docs:
+Все доступные CRUD операции прописаны в документации по пути /docs.
+
+В проекте реализовано кэширование с помощью redis.
+
+Создана задача в celery для синхронизации базы данных из excel файла Menu.xlsx (расположен в папке admin)
 
 ### Добавленный эндпоинт  в  ДЗ 4 для вывода всех объектов в базе:
 * {{LOCAL_URL}}/api/v1/menus/menus_info/
@@ -80,12 +84,6 @@ docker-compose up -d
 docker-compose -f docker-compose_tests.yml up --abort-on-container-exit && docker-compose -f docker-compose_tests.yml  down -v
 ```
 Команда поднимает контейнер, выполняет тесты, после чего удаляет контейнеры и тома.
-Выполнены доп. задания:
-ДЗ 2:
-* Реализовать вывод количества подменю и блюд для Меню через один (сложный) ORM запрос : (метод get_menu_db_with_counts в menus_repository,метод get_submenu_with_count_db в submenus_repository)
-* Реализовать тестовый сценарий «Проверка кол-ва блюд и подменю в меню» из Postman с помощью pytest (scenario_test в папке tests)
-ДЗ 3:
-* Описать ручки API в соответствий c OpenAPI (описание выполненно в роутерах)
 ## Стек технологий, использованных в проекте
 * python 3.10
 * fastapi
@@ -96,3 +94,5 @@ docker-compose -f docker-compose_tests.yml up --abort-on-container-exit && docke
 * python-dotenv
 * poetry
 * PostgreSQL
+* celery
+* redis

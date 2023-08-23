@@ -33,7 +33,7 @@ class SubmenuService:
             f'menu_id-{menu_id}:submenu_id-{submenu.id}', submenu
         )
         self.__background_tasks.add_task(
-            self._cache_service.delete_caches, [f'submenus_list_{menu_id}']
+            self._cache_service.delete_caches, [f'submenus_list_{menu_id}', 'all_menus']
         )
         return submenu
 
@@ -49,7 +49,7 @@ class SubmenuService:
         )
         self.__background_tasks.add_task(
             self._cache_service.delete_caches,
-            [f'submenus_list_{submenu.menu_id}'],
+            [f'submenus_list_{submenu.menu_id}', 'all_menus'],
         )
         return submenu
 
@@ -85,6 +85,10 @@ class SubmenuService:
             self._cache_service.invalidate_cache_for_submenu,
             menu_id,
             submenu_id,
+        )
+        self.__background_tasks.add_task(
+            self._cache_service.delete_caches,
+            [f'submenus_list_{menu_id}', 'all_menus'],
         )
         delete_submenu_from_db = (
             await self._submenus_repository.delete_submenu_db(submenu_id)

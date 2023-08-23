@@ -7,7 +7,7 @@ from redis import asyncio as aioredis
 from redis.asyncio.connection import ConnectionPool
 
 from src.api.response_models.dish_response import DishResponse
-from src.api.response_models.menu_response import MenuInfResponse
+from src.api.response_models.menu_response import MenuInfResponse, MenuSummaryResponse
 from src.api.response_models.submenu_response import SubmenuInfoResponse
 from src.core.settings import settings
 
@@ -18,6 +18,7 @@ CacheResponseType = Union[
     list[DishResponse],
     list[MenuInfResponse],
     list[SubmenuInfoResponse],
+    list[MenuSummaryResponse],
     None,
 ]
 

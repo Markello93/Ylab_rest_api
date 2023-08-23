@@ -42,7 +42,7 @@ class ExcelParser:
 
         updated_rows = []
         for menu in all_menus:
-            menu_uuids.add(menu.id)
+            menu_uuids.add(str(menu.id))
             for submenu in menu.submenus:
                 submenu_uuids.add(f'{menu.id}:{submenu.id}')
                 for dish in submenu.dishes:
@@ -60,7 +60,7 @@ class ExcelParser:
                 current_menu = await self.__menu_service.update_menu(
                     UUID(row[0]), MenuRequest(title=row[1], description=row[2])
                 )
-                excel_menu_uuids.add(current_menu.id)
+                excel_menu_uuids.add(str(current_menu.id))
 
             if current_menu and isinstance(row[1], int):
                 current_submenu = await self.__sumbenu_service.create_submenu(

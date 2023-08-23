@@ -36,6 +36,7 @@ class DishService:
             [
                 f'submenus_list_{menu_id}',
                 f'dishes_list_{menu_id}_{submenu_id}',
+                'all_menus'
             ],
         )
         return dish
@@ -55,7 +56,7 @@ class DishService:
         )
         self.__background_tasks.add_task(
             self._cache_service.delete_caches,
-            [f'dishes_list_{menu_id}_{submenu_id}'],
+            [f'dishes_list_{menu_id}_{submenu_id}', 'all_menus'],
         )
         return dish
 
@@ -81,6 +82,7 @@ class DishService:
             [
                 f'menu_id-{menu_id}:submenu_id-{submenu_id}:dish_id-{dish_id}',
                 f'dishes_list_{menu_id}_{submenu_id}',
+                'all_menus'
             ],
         )
         self.__background_tasks.add_task(

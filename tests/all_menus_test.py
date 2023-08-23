@@ -1,4 +1,3 @@
-import pytest
 from httpx import AsyncClient
 
 
@@ -25,8 +24,7 @@ class TestDataGenerator:
         return expected_menu, expected_submenu, expected_dish
 
 
-@pytest.mark.run(order=34)
-async def test_check_all_menus(ac: AsyncClient) -> None:
+async def test_check_all_menus(ac: AsyncClient, clear_db) -> None:
     menu_data = {
         'title': 'Default Menu',
         'description': 'Default Menu Description',
@@ -49,9 +47,7 @@ async def test_check_all_menus(ac: AsyncClient) -> None:
     ) = await data_generator.generate_test_data(
         ac, menu_data, submenu_data, dish_data
     )
-    print(expected_menu)
-    print(expected_submenu)
-    print(expected_dish)
+
     response = await ac.get('/api/v1/menus/menus_info/')
     assert response.status_code == 200
 
@@ -79,3 +75,5 @@ async def test_check_all_menus(ac: AsyncClient) -> None:
     assert received_dish['title'] == expected_dish['title']
     assert received_dish['description'] == expected_dish['description']
     assert str(received_dish['price']) == expected_dish['price']
+
+    await ac.delete(f"/api/v1/menus/{received_menu['id']}")

@@ -27,7 +27,7 @@ class MenuService:
         menu = await self._menu_repository.create_menu_db(schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
         self.__background_tasks.add_task(
-            self._cache_service.delete_caches, ['list_menus']
+            self._cache_service.delete_caches, ['list_menus', 'all_menus']
         )
         return menu
 
@@ -38,7 +38,7 @@ class MenuService:
         menu = await self._menu_repository.update_menu_db(menu_id, schema)
         await self._cache_service.set_cache(f'menu_id-{menu.id}', menu)
         self.__background_tasks.add_task(
-            self._cache_service.delete_caches, ['list_menus']
+            self._cache_service.delete_caches, ['list_menus', 'all_menus']
         )
         return menu
 
@@ -57,7 +57,7 @@ class MenuService:
             self._cache_service.invalidate_cache_for_menu, menu_id
         )
         self.__background_tasks.add_task(
-            self._cache_service.delete_caches, ['list_menus']
+            self._cache_service.delete_caches, ['list_menus', 'all_menus']
         )
         delete_menu_from_db = await self._menu_repository.delete_menu_db(
             menu_id
@@ -75,4 +75,9 @@ class MenuService:
         return menus_response
 
     async def full_menus(self) -> list[MenuSummaryResponse]:
-        return await self._menu_repository.get_full_menus_info_db()
+        cached_full_menus = await self._cache_service.get_cache('all_menus')
+        if cached_full_menus:
+            return cached_full_menus
+        full_menus_response = await self._menu_repository.get_full_menus_info_db()
+        await self._cache_service.set_cache('all_menus', full_menus_response)
+        return full_menus_response

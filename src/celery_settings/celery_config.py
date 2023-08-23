@@ -22,20 +22,10 @@ celery_logger = get_task_logger(__name__)
 
 
 async def parse_excel_task() -> dict[str, str] | str | None:
-    try:
-        async with httpx.AsyncClient() as client:
-            celery_logger.info('sync_db')
-            response = await client.post(
-                'http://resto_back:8000/api/v1/update_from_excel'
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as e:
-        celery_logger.error(f'HTTP error: {e}')
-        return None
-    except Exception as e:
-        celery_logger.error(f'Error: {e}')
-        return str(e)
+    async with httpx.AsyncClient() as client:
+        celery_logger.info('sync_db')
+        response = await client.post('http://resto_back:8000/api/v1/update_from_excel')
+        return response.json()
 
 
 @app_celery.task(name='sync_db')
