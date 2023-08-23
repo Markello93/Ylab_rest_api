@@ -234,6 +234,3 @@ class TestScenario:
 
         assert response_json == [], f'Expected [] got {response_json} instead'
         await ac.delete(f"/api/v1/menus/{submenu_created_info['menu_id']}")
-
-    # async def cleanup(self,ac: AsyncClient, submenu_created_info: dict[str, str]) -> None:
-    #     await ac.delete(f"/api/v1/menus/{submenu_created_info['menu_id']}")
